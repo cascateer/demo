@@ -31,5 +31,8 @@
     "lodash": "^4.17.21",
     "rxjs": "^7.8.2",
     "three": "^0.182.0"
+  },
+  "optionalDependencies": {
+    "sass-embedded-linux-x64": "^1.99.0"
   }
 }
