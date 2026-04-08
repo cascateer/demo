@@ -8,8 +8,6 @@ export default {
     }),
   ],
 
-  base: "/dist",
-
   esbuild: {
     jsx: "transform",
     jsxFactory: "createElement",
