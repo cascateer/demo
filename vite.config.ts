@@ -10,22 +10,14 @@ export default {
 
   esbuild: {
     jsx: "transform",
-    jsxFactory: "jsx.createElement",
-    jsxFragment: "jsx.createFragment",
-    jsxInject: "import { jsx } from '@cascateer/core'",
-  },
-
-  resolve: {
-    alias: {
-      "@cascateer/core/jsx-dev-runtime": "@cascateer/core/jsx-runtime",
-    },
+    jsxFactory: "createElement",
+    jsxFragment: "createFragment",
+    jsxInject:
+      "import { createElement, createFragment } from '@cascateer/core'",
   },
 
   server: {
     port: 2402,
-    fs: {
-      allow: ["C:/Users/aak/repos/cascateer/demo"],
-    },
   },
 
   css: {
