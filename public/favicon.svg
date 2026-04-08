@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" height="32">
+    <style type="text/css">
+        <![CDATA[
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+        ]]>
+    </style>
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="50" fill="white"
+        style="font-family: JetBrains Mono; font-weight: 200; text-shadow: 0 0 10px color-mix(in srgb, #e5c07b, transparent 60%)">
+        <![CDATA[<$>]]>
+    </text>
+</svg>
