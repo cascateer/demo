@@ -15,6 +15,12 @@ export default {
     jsxInject: "import { jsx } from '@cascateer/core'",
   },
 
+  resolve: {
+    alias: {
+      "@cascateer/core/jsx-dev-runtime": "@cascateer/core/jsx-runtime",
+    },
+  },
+
   server: {
     port: 2402,
     fs: {
