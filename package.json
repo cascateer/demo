@@ -8,18 +8,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "swagger": "openapi-generator-cli generate",
-    "server": "json-server public/rubiks.json",
-    "start": "concurrently \"npm run server\" \"npm run dev\""
+    "preview": "vite preview"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
     "@types/object-hash": "^3.0.6",
     "@types/react": "^19.2.14",
     "@types/three": "^0.182.0",
-    "concurrently": "^9.2.1",
-    "json-server": "^1.0.0-beta.6",
     "sass-embedded": "^1.99.0",
     "typescript": "~5.8.3",
     "vite": "^7.1.2",

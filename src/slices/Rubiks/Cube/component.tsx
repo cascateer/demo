@@ -12,7 +12,7 @@ import { intersectWith, rotate3d, toCubieFaceletColor } from "../operators";
 import { Cube } from "../types";
 
 export const CubeComponent = createComponent("cube")
-  .withStyles(import("./styles.module.scss"), import("./styles.scss"))
+  .withStyles(import("./styles.module.scss"), import("./styles.scss?inline"))
   .withTemplate<
     {
       currentBaseAction: TerminalEffect<void, Cube.BaseAction | undefined>;
