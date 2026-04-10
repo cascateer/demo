@@ -16,8 +16,6 @@ export default {
       "import { createElement, createFragment } from '@cascateer/core'",
   },
 
-  base: "/demo/",
-
   server: {
     port: 2402,
   },
