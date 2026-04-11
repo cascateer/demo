@@ -4,11 +4,10 @@ import {
   defineCustomProperties,
 } from "@cascateer/core";
 import axios from "axios";
-import { combineLatest, from, map } from "rxjs";
+import { from } from "rxjs";
 import { CubeComponent } from "./Cube/component";
 import { CubeActionsComponent } from "./CubeActions/component";
 import { CubeControlsComponent } from "./CubeControls/component";
-import { div } from "./operators";
 import { Cube } from "./types";
 
 const BASE_URL = "https://server-jp2n.onrender.com/rubiks";
@@ -94,62 +93,15 @@ export const rubiksSlice = createSlice({
             () =>
               api.effects.customMoves(),
         ),
-        currentBaseActionIndex: effect<void, number>(
-          ({ store }) =>
-            () =>
-              store.effects.cubieSliceActionCount().pipe(div(27)),
-        ),
-      }))
-      .provideEffects(({ effect }) => ({
-        currentBaseAction: effect<void, Cube.BaseAction | undefined>(
-          ({ store, terminal }) =>
-            () =>
-              combineLatest([
-                store.effects.baseActionQueue(),
-                terminal.effects.currentBaseActionIndex(),
-              ]).pipe(
-                map(
-                  ([baseActionQueue, currentBaseActionIndex]) =>
-                    baseActionQueue[currentBaseActionIndex],
-                ),
-              ),
-        ),
-        currentSliceActions: effect<void, Cube.SliceAction[]>(
-          ({ store, terminal }) =>
-            () =>
-              combineLatest([
-                store.effects.baseActionQueue(),
-                terminal.effects.currentBaseActionIndex(),
-              ]).pipe(
-                map(([baseActionQueue, currentBaseActionIndex]) =>
-                  baseActionQueue.slice(0, currentBaseActionIndex).flat(),
-                ),
-              ),
-        ),
-      }))
-      .provideEffects(({ effect }) => ({
-        layout: effect<void, Cube.Layout>(
-          ({ terminal }) =>
-            () =>
-              terminal.effects
-                .currentSliceActions()
-                .pipe(
-                  map((currentSliceActions) =>
-                    new Cube.Layout().apply(...currentSliceActions),
-                  ),
-                ),
-        ),
       }))
       .complete(),
   components: ({ ComponentsProvider }) =>
     new ComponentsProvider()
       .provideComponents(({ component }) => ({
         Cube: component(
-          ({ store, terminal }) =>
+          ({ store }) =>
             new CubeComponent({
-              currentBaseAction: terminal.effects.currentBaseAction,
-              countCubieSliceAction: store.actions.countCubieSliceAction,
-              layout: terminal.effects.layout,
+              baseActionQueue: store.effects.baseActionQueue,
             }),
         ),
         CubeActions: component(

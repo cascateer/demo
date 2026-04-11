@@ -1,23 +1,30 @@
-import { Action, createComponent, TerminalEffect } from "@cascateer/core";
+import { createComponent, StoreEffect } from "@cascateer/core";
 import {
   animationFrameScheduler,
   auditTime,
+  combineLatest,
+  map,
   merge,
   pairwise,
+  scan,
+  startWith,
   Subject,
   switchAll,
   windowToggle,
 } from "rxjs";
-import { intersectWith, rotate3d, toCubieFaceletColor } from "../operators";
+import {
+  div,
+  intersectWith,
+  rotate3d,
+  toCubieFaceletColor,
+} from "../operators";
 import { Cube } from "../types";
 
 export const CubeComponent = createComponent("cube")
   .withStyles(import("./styles.module.scss"), import("./styles.scss?inline"))
   .withTemplate<
     {
-      currentBaseAction: TerminalEffect<void, Cube.BaseAction | undefined>;
-      countCubieSliceAction: Action<void, void>;
-      layout: TerminalEffect<void, Cube.Layout>;
+      baseActionQueue: StoreEffect<Cube.BaseAction[]>;
     },
     {}
   >((deps, classNames) => () => {
@@ -25,6 +32,35 @@ export const CubeComponent = createComponent("cube")
     const mouseUp = new Subject<MouseEvent>();
     const mouseMove = new Subject<MouseEvent>();
     const mouseLeave = new Subject<MouseEvent>();
+
+    const cubieSliceAction = new Subject<void>();
+    const currentBaseActionIndex = cubieSliceAction.pipe(
+      scan((acc) => acc + 1, 0),
+      div(27),
+      startWith(0),
+    );
+
+    const currentBaseAction = combineLatest([
+      deps.baseActionQueue(),
+      currentBaseActionIndex,
+    ]).pipe(
+      map(
+        ([baseActionQueue, currentBaseActionIndex]) =>
+          baseActionQueue[currentBaseActionIndex],
+      ),
+    );
+
+    const layout = combineLatest([
+      deps.baseActionQueue(),
+      currentBaseActionIndex,
+    ]).pipe(
+      map(([baseActionQueue, currentBaseActionIndex]) =>
+        baseActionQueue.slice(0, currentBaseActionIndex).flat(),
+      ),
+      map((currentSliceActions) =>
+        new Cube.Layout().apply(...currentSliceActions),
+      ),
+    );
 
     return (
       <div
@@ -49,10 +85,10 @@ export const CubeComponent = createComponent("cube")
           {Cube.CUBIES.map((cubie) => (
             <div
               className={classNames.cubieSpace}
-              data-cubie-slice-action={deps
-                .currentBaseAction()
-                .pipe(intersectWith(cubie))}
-              onAnimationEnd={() => deps.countCubieSliceAction()}
+              data-cubie-slice-action={currentBaseAction.pipe(
+                intersectWith(cubie),
+              )}
+              onAnimationEnd={() => cubieSliceAction.next()}
             >
               <div
                 className={classNames.cubie}
@@ -71,9 +107,7 @@ export const CubeComponent = createComponent("cube")
                   >
                     <div
                       className={classNames.cubieFacelet}
-                      data-color={deps
-                        .layout()
-                        .pipe(toCubieFaceletColor(cubie, face))}
+                      data-color={layout.pipe(toCubieFaceletColor(cubie, face))}
                     />
                   </div>
                 ))}
