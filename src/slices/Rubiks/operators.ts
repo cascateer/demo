@@ -37,15 +37,21 @@ export const intersectWith =
     );
 
 export const rotate3d =
-  (): OperatorFunction<[MouseEvent, MouseEvent], string> => (source) =>
+  (): OperatorFunction<(MouseEvent | TouchEvent)[], string> => (source) =>
     source.pipe(
-      map(
-        (v) =>
-          new Vector3(
-            v[0].clientY - v[1].clientY,
-            v[1].clientX - v[0].clientX,
-            0,
-          ),
+      map((events) =>
+        events.flatMap((event) =>
+          event instanceof TouchEvent ? (event.touches[0] ?? []) : event,
+        ),
+      ),
+      map((v) =>
+        0 in v && 1 in v
+          ? new Vector3(
+              v[0].clientY - v[1].clientY,
+              v[1].clientX - v[0].clientX,
+              0,
+            )
+          : new Vector3(),
       ),
       map((u) =>
         new Quaternion().setFromAxisAngle(u.normalize(), u.length() / 0.6e2),

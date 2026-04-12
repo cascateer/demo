@@ -25,10 +25,10 @@ export const CubeComponent = createComponent("cube")
     },
     {}
   >((deps, classNames) => () => {
-    const mouseDown = new Subject<MouseEvent>();
-    const mouseUp = new Subject<MouseEvent>();
-    const mouseMove = new Subject<MouseEvent>();
-    const mouseLeave = new Subject<MouseEvent>();
+    const mouseDownOrTouchStart = new Subject<MouseEvent | TouchEvent>();
+    const mouseUpOrTouchEnd = new Subject<MouseEvent | TouchEvent>();
+    const mouseMoveOrTouchMove = new Subject<MouseEvent | TouchEvent>();
+    const mouseLeaveOrTouchCancel = new Subject<MouseEvent | TouchEvent>();
 
     const cubieSliceAction = new Subject<void>();
     const currentBaseActionIndex = cubieSliceAction.pipe(
@@ -63,16 +63,22 @@ export const CubeComponent = createComponent("cube")
     return (
       <div
         className={classNames.cubeSpace}
-        onMouseDown={mouseDown}
-        onMouseUp={mouseUp}
-        onMouseMove={mouseMove}
-        onMouseLeave={mouseLeave}
+        onMouseDown={mouseDownOrTouchStart}
+        onTouchStart={mouseDownOrTouchStart}
+        onMouseUp={mouseUpOrTouchEnd}
+        onTouchEnd={mouseUpOrTouchEnd}
+        onMouseMove={mouseMoveOrTouchMove}
+        onTouchMove={mouseMoveOrTouchMove}
+        onMouseLeave={mouseLeaveOrTouchCancel}
+        onTouchCancel={mouseLeaveOrTouchCancel}
       >
         <div
           className={classNames.cube}
           style={{
-            transform: mouseMove.pipe(
-              windowToggle(mouseDown, () => merge(mouseUp, mouseLeave)),
+            transform: mouseMoveOrTouchMove.pipe(
+              windowToggle(mouseDownOrTouchStart, () =>
+                merge(mouseUpOrTouchEnd, mouseLeaveOrTouchCancel),
+              ),
               switchAll(),
               pairwise(),
               rotate3d(),
