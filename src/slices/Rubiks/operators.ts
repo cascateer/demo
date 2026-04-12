@@ -41,7 +41,7 @@ export const rotate3d =
     source.pipe(
       map((events) =>
         events.flatMap((event) =>
-          event instanceof TouchEvent ? (event.touches[0] ?? []) : event,
+          "touches" in event ? (event.touches[0] ?? []) : event,
         ),
       ),
       map((v) =>
