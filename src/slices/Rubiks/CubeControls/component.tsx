@@ -24,7 +24,10 @@ export const CubeControlsComponent = createComponent("cubeControls")
 
     return (
       <>
-        <div className={classNames.cubeControls}>
+        <div
+          className={classNames.cubeControls}
+          data-loading={deps.baseMoves().loading}
+        >
           {deps.baseMoves().pipe(
             map((baseMoves) =>
               Object.values(baseMoves)
@@ -33,7 +36,10 @@ export const CubeControlsComponent = createComponent("cubeControls")
             ),
           )}
         </div>
-        <div className={classNames.cubeControls}>
+        <div
+          className={classNames.cubeControls}
+          data-loading={deps.customMoves().loading}
+        >
           {deps
             .customMoves()
             .pipe(

@@ -2,6 +2,10 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+
+    &[data-loading="true"]::before {
+        content: "loading...";
+    }
 }
 
 .cube-control {
