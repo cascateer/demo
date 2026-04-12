@@ -100,11 +100,11 @@ $sliceProps: (
 .cubie-space {
     animation-duration: 2s;
 
-    &[data-cubie-slice-action$="0"] {
+    &[data-cubie-slice-action$="-0"] {
         animation-name: empty-action-0;
     }
 
-    &[data-cubie-slice-action$="1"] {
+    &[data-cubie-slice-action$="-1"] {
         animation-name: empty-action-1;
     }
 
@@ -113,8 +113,8 @@ $sliceProps: (
             @each $n in (1, 2, 3) {
                 $degree: calc($sign * $n);
 
-                @each $sign in (0, 1) {
-                    $animationName: action-#{$slice}#{$degree}-#{$sign};
+                @each $parity in (0, 1) {
+                    $animationName: action-#{$slice}#{$degree}-#{$parity};
 
                     @keyframes #{$animationName} {
                         to {
@@ -123,7 +123,7 @@ $sliceProps: (
                         }
                     }
 
-                    &[data-cubie-slice-action="#{$slice}#{$degree}-#{$sign}"] {
+                    &[data-cubie-slice-action="#{$slice}#{$degree}-#{$parity}"] {
                         animation-name: $animationName;
                     }
                 }

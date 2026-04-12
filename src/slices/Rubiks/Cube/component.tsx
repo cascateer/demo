@@ -34,8 +34,8 @@ export const CubeComponent = createComponent("cube")
     const currentBaseActionIndex = cubieSliceAction.pipe(
       scan((acc) => acc + 1, 0),
       map((count) => div(count, 27)),
-      distinctUntilChanged(),
       startWith(0),
+      distinctUntilChanged(),
     );
 
     const currentBaseAction = combineLatest([
@@ -87,9 +87,11 @@ export const CubeComponent = createComponent("cube")
                 currentBaseAction.pipe(intersectWith(cubie)),
                 currentBaseActionIndex.pipe(map((index) => mod(index, 2))),
               ]).pipe(
-                map(([action, sign]) =>
-                  action != null ? `${action || "none"}-${sign}` : void 0,
-                ),
+                map(([action, parity]) => {
+                  if (action != null) {
+                    return [action || "none", parity].join("-");
+                  }
+                }),
               )}
               onAnimationEnd={() => cubieSliceAction.next()}
             >
