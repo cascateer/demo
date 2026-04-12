@@ -89,7 +89,7 @@ export const CubeComponent = createComponent("cube")
               ]).pipe(
                 map(([action, parity]) => {
                   if (action != null) {
-                    return [action || "none", parity].join("-");
+                    return [action || "void", parity].join("_");
                   }
                 }),
               )}
