@@ -3,11 +3,6 @@ import { map, OperatorFunction, scan } from "rxjs";
 import { Quaternion, Vector3 } from "three";
 import { Cube } from "./types";
 
-export const div =
-  (b: number): OperatorFunction<number, number> =>
-  (source) =>
-    source.pipe(map((a) => ~~(a / b)));
-
 export const toCubieFaceletColor =
   (
     { faces, index }: Cube.Cubie,

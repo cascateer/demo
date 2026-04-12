@@ -1,4 +1,7 @@
-@keyframes empty-action {
+@keyframes empty-action-0 {
+}
+
+@keyframes empty-action-1 {
 }
 
 $faceProps: (
@@ -97,25 +100,32 @@ $sliceProps: (
 .cubie-space {
     animation-duration: 2s;
 
-    &[data-cubie-slice-action] {
-        animation-name: empty-action;
+    &[data-cubie-slice-action$="0"] {
+        animation-name: empty-action-0;
+    }
+
+    &[data-cubie-slice-action$="1"] {
+        animation-name: empty-action-1;
     }
 
     @each $slice, $props in $sliceProps {
         @each $sign in (-1, 1) {
             @each $n in (1, 2, 3) {
                 $degree: calc($sign * $n);
-                $animationName: action-#{$slice}#{$degree};
 
-                @keyframes #{$animationName} {
-                    to {
-                        transform: rotate#{map-get($props, "axis")
-                            }(calc(#{90deg * $degree} * #{map-get($props, "direction")}));
+                @each $sign in (0, 1) {
+                    $animationName: action-#{$slice}#{$degree}-#{$sign};
+
+                    @keyframes #{$animationName} {
+                        to {
+                            transform: rotate#{map-get($props, "axis")
+                                }(calc(#{90deg * $degree} * #{map-get($props, "direction")}));
+                        }
                     }
-                }
 
-                &[data-cubie-slice-action="#{$slice}#{$degree}"] {
-                    animation-name: $animationName;
+                    &[data-cubie-slice-action="#{$slice}#{$degree}-#{$sign}"] {
+                        animation-name: $animationName;
+                    }
                 }
             }
         }

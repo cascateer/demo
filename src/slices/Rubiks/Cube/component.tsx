@@ -3,6 +3,7 @@ import {
   animationFrameScheduler,
   auditTime,
   combineLatest,
+  distinctUntilChanged,
   map,
   merge,
   pairwise,
@@ -12,12 +13,8 @@ import {
   switchAll,
   windowToggle,
 } from "rxjs";
-import {
-  div,
-  intersectWith,
-  rotate3d,
-  toCubieFaceletColor,
-} from "../operators";
+import { div, mod } from "../math";
+import { intersectWith, rotate3d, toCubieFaceletColor } from "../operators";
 import { Cube } from "../types";
 
 export const CubeComponent = createComponent("cube")
@@ -36,7 +33,8 @@ export const CubeComponent = createComponent("cube")
     const cubieSliceAction = new Subject<void>();
     const currentBaseActionIndex = cubieSliceAction.pipe(
       scan((acc) => acc + 1, 0),
-      div(27),
+      map((count) => div(count, 27)),
+      distinctUntilChanged(),
       startWith(0),
     );
 
@@ -85,8 +83,13 @@ export const CubeComponent = createComponent("cube")
           {Cube.CUBIES.map((cubie) => (
             <div
               className={classNames.cubieSpace}
-              data-cubie-slice-action={currentBaseAction.pipe(
-                intersectWith(cubie),
+              data-cubie-slice-action={combineLatest([
+                currentBaseAction.pipe(intersectWith(cubie)),
+                currentBaseActionIndex.pipe(map((index) => mod(index, 2))),
+              ]).pipe(
+                map(([action, sign]) =>
+                  action != null ? `${action || "none"}-${sign}` : void 0,
+                ),
               )}
               onAnimationEnd={() => cubieSliceAction.next()}
             >
