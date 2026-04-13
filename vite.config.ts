@@ -8,12 +8,11 @@ export default {
     }),
   ],
 
-  esbuild: {
-    jsx: "transform",
-    jsxFactory: "createElement",
-    jsxFragment: "createFragment",
-    jsxInject:
-      "import { createElement, createFragment } from '@cascateer/core'",
+  oxc: {
+    jsx: {
+      runtime: "automatic",
+      importSource: "@cascateer/core",
+    },
   },
 
   server: {
