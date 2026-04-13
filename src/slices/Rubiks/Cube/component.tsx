@@ -1,19 +1,15 @@
-import { createComponent, StoreEffect } from "@cascateer/core";
+import { Action, createComponent, TerminalEffect } from "@cascateer/core";
 import {
   animationFrameScheduler,
   auditTime,
   combineLatest,
-  distinctUntilChanged,
   map,
   merge,
   pairwise,
-  scan,
-  startWith,
   Subject,
   switchAll,
   windowToggle,
 } from "rxjs";
-import { div, mod } from "../math";
 import { intersectWith, rotate3d, toCubieFaceletColor } from "../operators";
 import { Cube } from "../types";
 
@@ -21,7 +17,11 @@ export const CubeComponent = createComponent("cube")
   .withStyles(import("./styles.module.scss"), import("./styles.scss?inline"))
   .withTemplate<
     {
-      baseActionQueue: StoreEffect<Cube.BaseAction[]>;
+      currentBaseActionIndex: TerminalEffect<void, number>;
+      currentBaseActionParity: TerminalEffect<void, 0 | 1>;
+      currentBaseAction: TerminalEffect<void, Cube.BaseAction | undefined>;
+      countCubieSliceAction: Action<void, void>;
+      layout: TerminalEffect<void, Cube.Layout>;
     },
     {}
   >((deps, classNames) => () => {
@@ -29,36 +29,6 @@ export const CubeComponent = createComponent("cube")
     const mouseUpOrTouchEnd = new Subject<MouseEvent | TouchEvent>();
     const mouseMoveOrTouchMove = new Subject<MouseEvent | TouchEvent>();
     const mouseLeaveOrTouchCancel = new Subject<MouseEvent | TouchEvent>();
-
-    const cubieSliceAction = new Subject<void>();
-    const currentBaseActionIndex = cubieSliceAction.pipe(
-      scan((acc) => acc + 1, 0),
-      map((count) => div(count, 27)),
-      startWith(0),
-      distinctUntilChanged(),
-    );
-
-    const currentBaseAction = combineLatest([
-      deps.baseActionQueue(),
-      currentBaseActionIndex,
-    ]).pipe(
-      map(
-        ([baseActionQueue, currentBaseActionIndex]) =>
-          baseActionQueue[currentBaseActionIndex],
-      ),
-    );
-
-    const layout = combineLatest([
-      deps.baseActionQueue(),
-      currentBaseActionIndex,
-    ]).pipe(
-      map(([baseActionQueue, currentBaseActionIndex]) =>
-        baseActionQueue.slice(0, currentBaseActionIndex).flat(),
-      ),
-      map((currentSliceActions) =>
-        new Cube.Layout().apply(...currentSliceActions),
-      ),
-    );
 
     return (
       <div
@@ -90,8 +60,8 @@ export const CubeComponent = createComponent("cube")
             <div
               className={classNames.cubieSpace}
               data-cubie-slice-action={combineLatest([
-                currentBaseAction.pipe(intersectWith(cubie)),
-                currentBaseActionIndex.pipe(map((index) => mod(index, 2))),
+                deps.currentBaseAction().pipe(intersectWith(cubie)),
+                deps.currentBaseActionParity(),
               ]).pipe(
                 map(([action, parity]) => {
                   if (action != null) {
@@ -99,7 +69,7 @@ export const CubeComponent = createComponent("cube")
                   }
                 }),
               )}
-              onAnimationEnd={() => cubieSliceAction.next()}
+              onAnimationEnd={() => deps.countCubieSliceAction()}
             >
               <div
                 className={classNames.cubie}
@@ -118,7 +88,9 @@ export const CubeComponent = createComponent("cube")
                   >
                     <div
                       className={classNames.cubieFacelet}
-                      data-color={layout.pipe(toCubieFaceletColor(cubie, face))}
+                      data-color={deps
+                        .layout()
+                        .pipe(toCubieFaceletColor(cubie, face))}
                     />
                   </div>
                 ))}

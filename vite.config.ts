@@ -15,10 +15,6 @@ export default {
     },
   },
 
-  server: {
-    port: 2402,
-  },
-
   css: {
     modules: {
       scopeBehaviour: "local",
