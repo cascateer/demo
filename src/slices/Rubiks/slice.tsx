@@ -4,11 +4,11 @@ import {
   defineCustomProperties,
 } from "@cascateer/core";
 import axios from "axios";
-import { combineLatest, distinctUntilChanged, from, map } from "rxjs";
+import { combineLatest, from, map } from "rxjs";
 import { CubeComponent } from "./Cube/component";
 import { CubeActionsComponent } from "./CubeActions/component";
 import { CubeControlsComponent } from "./CubeControls/component";
-import { div, mod } from "./math";
+import { mod } from "./math";
 import { Cube } from "./types";
 
 const BASE_URL = "https://server-jp2n.onrender.com/rubiks";
@@ -44,14 +44,14 @@ declare global {
 export const rubiksSlice = createSlice({
   data: {
     baseActionQueue: new Array<Cube.BaseAction>(),
-    cubieSliceActionCount: 0,
+    currentBaseActionIndex: 0,
   },
   store: ({ StoreProvider }) =>
     new StoreProvider()
       .provideSignals(({ signal }) => ({
         baseActionQueue: signal(({ data }) => data.property("baseActionQueue")),
-        cubieSliceActionCount: signal(({ data }) =>
-          data.property("cubieSliceActionCount"),
+        currentBaseActionIndex: signal(({ data }) =>
+          data.property("currentBaseActionIndex"),
         ),
       }))
       .provideActions(({ action }) => ({
@@ -61,11 +61,12 @@ export const rubiksSlice = createSlice({
               baseActionQueue.concat(new Cube.Action(action).split()),
           ),
         ),
-        countCubieSliceAction: action<void>(({ cubieSliceActionCount }) =>
-          cubieSliceActionCount.update(
-            () => (cubieSliceActionCount) => cubieSliceActionCount + 1,
-            { sameOrigin: true },
-          ),
+        incrementCurrentBaseActionIndex: action<void>(
+          ({ currentBaseActionIndex }) =>
+            currentBaseActionIndex.update(
+              () => (currentBaseActionIndex) => currentBaseActionIndex + 1,
+              { sameOrigin: true },
+            ),
         ),
       }))
       .complete(),
@@ -94,29 +95,19 @@ export const rubiksSlice = createSlice({
             () =>
               api.effects.customMoves(),
         ),
-        currentBaseActionIndex: effect<void, number>(
+        currentBaseActionParity: effect<void, 0 | 1>(
           ({ store }) =>
             () =>
-              store.effects.cubieSliceActionCount().pipe(
-                map((count) => div(count, 27)),
-                distinctUntilChanged(),
-              ),
-        ),
-      }))
-      .provideEffects(({ effect }) => ({
-        currentBaseActionParity: effect<void, 0 | 1>(
-          ({ terminal }) =>
-            () =>
-              terminal.effects
+              store.effects
                 .currentBaseActionIndex()
                 .pipe(map((index) => (mod(index, 2) ? 1 : 0))),
         ),
         currentBaseAction: effect<void, Cube.BaseAction | undefined>(
-          ({ store, terminal }) =>
+          ({ store }) =>
             () =>
               combineLatest([
                 store.effects.baseActionQueue(),
-                terminal.effects.currentBaseActionIndex(),
+                store.effects.currentBaseActionIndex(),
               ]).pipe(
                 map(
                   ([baseActionQueue, currentBaseActionIndex]) =>
@@ -125,11 +116,11 @@ export const rubiksSlice = createSlice({
               ),
         ),
         currentSliceActions: effect<void, Cube.SliceAction[]>(
-          ({ store, terminal }) =>
+          ({ store }) =>
             () =>
               combineLatest([
                 store.effects.baseActionQueue(),
-                terminal.effects.currentBaseActionIndex(),
+                store.effects.currentBaseActionIndex(),
               ]).pipe(
                 map(([baseActionQueue, currentBaseActionIndex]) =>
                   baseActionQueue.slice(0, currentBaseActionIndex).flat(),
@@ -157,10 +148,11 @@ export const rubiksSlice = createSlice({
         Cube: component(
           ({ store, terminal }) =>
             new CubeComponent({
-              currentBaseActionIndex: terminal.effects.currentBaseActionIndex,
+              currentBaseActionIndex: store.effects.currentBaseActionIndex,
               currentBaseActionParity: terminal.effects.currentBaseActionParity,
               currentBaseAction: terminal.effects.currentBaseAction,
-              countCubieSliceAction: store.actions.countCubieSliceAction,
+              incrementCurrentBaseActionIndex:
+                store.actions.incrementCurrentBaseActionIndex,
               layout: terminal.effects.layout,
             }),
         ),

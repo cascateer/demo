@@ -2,6 +2,7 @@ import { Action, createComponent, TerminalEffect } from "@cascateer/core";
 import {
   animationFrameScheduler,
   auditTime,
+  bufferCount,
   combineLatest,
   map,
   merge,
@@ -20,7 +21,7 @@ export const CubeComponent = createComponent("cube")
       currentBaseActionIndex: TerminalEffect<void, number>;
       currentBaseActionParity: TerminalEffect<void, 0 | 1>;
       currentBaseAction: TerminalEffect<void, Cube.BaseAction | undefined>;
-      countCubieSliceAction: Action<void, void>;
+      incrementCurrentBaseActionIndex: Action<void, void>;
       layout: TerminalEffect<void, Cube.Layout>;
     },
     {}
@@ -29,6 +30,11 @@ export const CubeComponent = createComponent("cube")
     const mouseUpOrTouchEnd = new Subject<MouseEvent | TouchEvent>();
     const mouseMoveOrTouchMove = new Subject<MouseEvent | TouchEvent>();
     const mouseLeaveOrTouchCancel = new Subject<MouseEvent | TouchEvent>();
+    const animationEnd = new Subject<void>();
+
+    animationEnd.pipe(bufferCount(27)).subscribe({
+      next: () => deps.incrementCurrentBaseActionIndex(),
+    });
 
     return (
       <div
@@ -69,7 +75,7 @@ export const CubeComponent = createComponent("cube")
                   }
                 }),
               )}
-              onAnimationEnd={() => deps.countCubieSliceAction()}
+              onAnimationEnd={() => animationEnd.next()}
             >
               <div
                 className={classNames.cubie}

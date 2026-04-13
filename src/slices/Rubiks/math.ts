@@ -11,8 +11,6 @@ import {
 } from "lodash";
 import { UnaryFunction } from "rxjs";
 
-export const div = (a: number, b: number) => ~~(a / b);
-
 export const mod = (a: number, m: number) => ((a % m) + m) % m;
 
 export class MapArray<T> extends Array<T> {
