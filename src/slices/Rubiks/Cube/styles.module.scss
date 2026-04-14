@@ -99,6 +99,7 @@ $sliceProps: (
 
 .cubie-space {
     animation-duration: 2s;
+    animation-fill-mode: forwards;
 
     &[data-cubie-slice-action$="_0"] {
         animation-name: action_void_0;
