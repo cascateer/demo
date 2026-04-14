@@ -86,14 +86,10 @@ export const rubiksSlice = createSlice({
     new TerminalProvider()
       .provideEffects(({ effect }) => ({
         baseMoves: effect<void, Cube.BaseMoves>(
-          ({ api }) =>
-            () =>
-              api.effects.baseMoves(),
+          ({ api }) => api.effects.baseMoves,
         ),
         customMoves: effect<void, Cube.Move[]>(
-          ({ api }) =>
-            () =>
-              api.effects.customMoves(),
+          ({ api }) => api.effects.customMoves,
         ),
         currentBaseActionParity: effect<void, 0 | 1>(
           ({ store }) =>
