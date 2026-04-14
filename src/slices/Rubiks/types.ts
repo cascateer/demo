@@ -164,6 +164,8 @@ export namespace Cube {
     }
   }
 
+  export type BaseActionParity = "odd" | "even";
+
   export interface BaseMove<A extends Axis> {
     key: string;
     action: BaseActionConfig<A>;

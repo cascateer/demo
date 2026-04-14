@@ -1,7 +1,7 @@
-@keyframes action_void_0 {
+@keyframes action_empty_odd {
 }
 
-@keyframes action_void_1 {
+@keyframes action_empty_even {
 }
 
 $faceProps: (
@@ -101,12 +101,12 @@ $sliceProps: (
     animation-duration: 2s;
     animation-fill-mode: forwards;
 
-    &[data-cubie-slice-action$="_0"] {
-        animation-name: action_void_0;
+    &[data-cubie-slice-action$="_odd"] {
+        animation-name: action_empty_odd;
     }
 
-    &[data-cubie-slice-action$="_1"] {
-        animation-name: action_void_1;
+    &[data-cubie-slice-action$="_even"] {
+        animation-name: action_empty_even;
     }
 
     @each $slice, $props in $sliceProps {
@@ -114,7 +114,7 @@ $sliceProps: (
             @each $n in (1, 2, 3) {
                 $degree: calc($sign * $n);
 
-                @each $parity in (0, 1) {
+                @each $parity in (odd, even) {
                     $animationName: action_#{$slice}#{$degree}_#{$parity};
 
                     @keyframes #{$animationName} {

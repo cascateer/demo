@@ -91,12 +91,12 @@ export const rubiksSlice = createSlice({
         customMoves: effect<void, Cube.Move[]>(
           ({ api }) => api.effects.customMoves,
         ),
-        currentBaseActionParity: effect<void, 0 | 1>(
+        currentBaseActionParity: effect<void, Cube.BaseActionParity>(
           ({ store }) =>
             () =>
               store.effects
                 .currentBaseActionIndex()
-                .pipe(map((index) => (mod(index, 2) ? 1 : 0))),
+                .pipe(map((index) => (mod(index, 2) === 1 ? "odd" : "even"))),
         ),
         currentBaseAction: effect<void, Cube.BaseAction | undefined>(
           ({ store }) =>

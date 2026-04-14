@@ -19,7 +19,7 @@ export const CubeComponent = createComponent("cube")
   .withTemplate<
     {
       currentBaseActionIndex: TerminalEffect<void, number>;
-      currentBaseActionParity: TerminalEffect<void, 0 | 1>;
+      currentBaseActionParity: TerminalEffect<void, Cube.BaseActionParity>;
       currentBaseAction: TerminalEffect<void, Cube.BaseAction | undefined>;
       incrementCurrentBaseActionIndex: Action<void, void>;
       layout: TerminalEffect<void, Cube.Layout>;
@@ -71,7 +71,7 @@ export const CubeComponent = createComponent("cube")
               ]).pipe(
                 map(([action, parity]) => {
                   if (action != null) {
-                    return [action || "void", parity].join("_");
+                    return [action || "empty", parity].join("_");
                   }
                 }),
               )}
