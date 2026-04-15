@@ -9,6 +9,7 @@ import {
   pairwise,
   Subject,
   switchAll,
+  tap,
   windowToggle,
 } from "rxjs";
 import { intersectWith, rotate3d, toCubieFaceletColor } from "../operators";
@@ -96,7 +97,10 @@ export const CubeComponent = createComponent("cube")
                       className={classNames.cubieFacelet}
                       data-color={deps
                         .layout()
-                        .pipe(toCubieFaceletColor(cubie, face))}
+                        .pipe(
+                          tap(console.log),
+                          toCubieFaceletColor(cubie, face),
+                        )}
                     />
                   </div>
                 ))}
