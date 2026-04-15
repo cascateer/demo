@@ -1,4 +1,9 @@
-import { Action, createComponent, TerminalEffect } from "@cascateer/core";
+import {
+  Action,
+  ApiEffect,
+  createComponent,
+  TerminalEffect,
+} from "@cascateer/core";
 import { map } from "rxjs";
 import { Cube } from "../types";
 
@@ -9,6 +14,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
       baseMoves: TerminalEffect<void, Cube.BaseMoves>;
       customMoves: TerminalEffect<void, Cube.Move[]>;
       queueAction: Action<Cube.ActionConfig, void>;
+      test: ApiEffect<void, number>;
     },
     {}
   >((deps, classNames) => () => {
@@ -24,6 +30,11 @@ export const CubeControlsComponent = createComponent("cubeControls")
 
     return (
       <>
+        <div>
+          {deps
+            .test()
+            .loading.pipe(map((loading) => (loading ? "loading" : "done")))}
+        </div>
         <div
           className={classNames.cubeControls}
           data-loading={deps.baseMoves().loading}

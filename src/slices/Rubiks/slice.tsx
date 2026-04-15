@@ -4,7 +4,7 @@ import {
   defineCustomProperties,
 } from "@cascateer/core";
 import axios from "axios";
-import { combineLatest, from, map } from "rxjs";
+import { combineLatest, delay, from, map, of } from "rxjs";
 import { CubeComponent } from "./Cube/component";
 import { CubeActionsComponent } from "./CubeActions/component";
 import { CubeControlsComponent } from "./CubeControls/component";
@@ -79,6 +79,9 @@ export const rubiksSlice = createSlice({
       customMoves: effect<void, Cube.Move[]>((axios) => ({
         predicate: () => from(axios.get(`${BASE_URL}/customMoves`)),
         tags: "customMoves",
+      })),
+      test: effect<void, number>(() => ({
+        predicate: () => of({ data: 100 }).pipe(delay(2e3)),
       })),
     }))
     .complete(),
@@ -159,11 +162,12 @@ export const rubiksSlice = createSlice({
             }),
         ),
         CubeControls: component(
-          ({ store, terminal }) =>
+          ({ store, api, terminal }) =>
             new CubeControlsComponent({
               baseMoves: terminal.effects.baseMoves,
               customMoves: terminal.effects.customMoves,
               queueAction: store.actions.queueAction,
+              test: api.effects.test,
             }),
         ),
       }))
