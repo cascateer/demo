@@ -1,4 +1,5 @@
 import { Action, createComponent, TerminalEffect } from "@cascateer/core";
+import { tap } from "lodash";
 import {
   animationFrameScheduler,
   auditTime,
@@ -9,7 +10,6 @@ import {
   pairwise,
   Subject,
   switchAll,
-  tap,
   windowToggle,
 } from "rxjs";
 import { intersectWith, rotate3d, toCubieFaceletColor } from "../operators";
@@ -95,12 +95,10 @@ export const CubeComponent = createComponent("cube")
                   >
                     <div
                       className={classNames.cubieFacelet}
-                      data-color={deps
-                        .layout()
-                        .pipe(
-                          tap(console.log),
-                          toCubieFaceletColor(cubie, face),
-                        )}
+                      data-color={tap(
+                        deps.layout().pipe(toCubieFaceletColor(cubie, face)),
+                        console.log,
+                      )}
                     />
                   </div>
                 ))}
