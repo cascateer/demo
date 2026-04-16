@@ -80,9 +80,6 @@ export const rubiksSlice = createSlice({
         predicate: () => from(axios.get(`${BASE_URL}/customMoves`)),
         tags: "customMoves",
       })),
-      test: effect<void, number>(() => ({
-        predicate: () => of({ data: 100 }).pipe(delay(2e3)),
-      })),
     }))
     .complete(),
   terminal: ({ TerminalProvider }) =>
@@ -167,7 +164,6 @@ export const rubiksSlice = createSlice({
               baseMoves: terminal.effects.baseMoves,
               customMoves: terminal.effects.customMoves,
               queueAction: store.actions.queueAction,
-              test: api.effects.test,
             }),
         ),
       }))
