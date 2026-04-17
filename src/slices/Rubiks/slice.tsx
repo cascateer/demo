@@ -4,7 +4,7 @@ import {
   defineCustomProperties,
 } from "@cascateer/core";
 import axios from "axios";
-import { combineLatest, delay, from, map, of } from "rxjs";
+import { combineLatest, from, map } from "rxjs";
 import { CubeComponent } from "./Cube/component";
 import { CubeActionsComponent } from "./CubeActions/component";
 import { CubeControlsComponent } from "./CubeControls/component";
@@ -159,7 +159,7 @@ export const rubiksSlice = createSlice({
             }),
         ),
         CubeControls: component(
-          ({ store, api, terminal }) =>
+          ({ store, terminal }) =>
             new CubeControlsComponent({
               baseMoves: terminal.effects.baseMoves,
               customMoves: terminal.effects.customMoves,

@@ -1,9 +1,4 @@
-import {
-  Action,
-  ApiEffect,
-  createComponent,
-  TerminalEffect,
-} from "@cascateer/core";
+import { Action, createComponent, TerminalEffect } from "@cascateer/core";
 import { map } from "rxjs";
 import { Cube } from "../types";
 
