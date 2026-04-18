@@ -4,7 +4,7 @@ import {
   defineCustomProperties,
 } from "@cascateer/core";
 import axios from "axios";
-import { combineLatest, from, map } from "rxjs";
+import { combineLatest, delay, from, map } from "rxjs";
 import { CubeComponent } from "./Cube/component";
 import { CubeActionsComponent } from "./CubeActions/component";
 import { CubeControlsComponent } from "./CubeControls/component";
@@ -86,10 +86,14 @@ export const rubiksSlice = createSlice({
     new TerminalProvider()
       .provideEffects(({ effect }) => ({
         baseMoves: effect<void, Cube.BaseMoves>(
-          ({ api }) => api.effects.baseMoves,
+          ({ api }) =>
+            () =>
+              api.effects.baseMoves().pipe(delay(2e3)),
         ),
         customMoves: effect<void, Cube.Move[]>(
-          ({ api }) => api.effects.customMoves,
+          ({ api }) =>
+            () =>
+              api.effects.customMoves().pipe(delay(2e3)),
         ),
         currentBaseActionParity: effect<void, Cube.BaseActionParity>(
           ({ store }) =>
