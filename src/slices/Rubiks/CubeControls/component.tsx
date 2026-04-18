@@ -26,7 +26,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
       <>
         <div
           className={classNames.cubeControls}
-          data-loading={deps.baseMoves().loading}
+          data-loading={deps.baseMoves().pending}
         >
           {deps.baseMoves().pipe(
             map((baseMoves) =>
@@ -38,7 +38,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
         </div>
         <div
           className={classNames.cubeControls}
-          data-loading={deps.customMoves().loading}
+          data-loading={deps.customMoves().pending}
         >
           {deps
             .customMoves()
