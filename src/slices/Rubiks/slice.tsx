@@ -73,11 +73,13 @@ export const rubiksSlice = createSlice({
   api: new ApiProvider(axios)
     .provideEffects(({ effect }) => ({
       baseMoves: effect<void, Cube.BaseMoves>((axios) => ({
-        predicate: () => from(axios.get(`${BASE_URL}/baseMoves`)),
+        predicate: () =>
+          from(axios.get(`${BASE_URL}/baseMoves`)).pipe(delay(1e3)),
         tags: "baseMoves",
       })),
       customMoves: effect<void, Cube.Move[]>((axios) => ({
-        predicate: () => from(axios.get(`${BASE_URL}/customMoves`)),
+        predicate: () =>
+          from(axios.get(`${BASE_URL}/customMoves`)).pipe(delay(1e3)),
         tags: "customMoves",
       })),
     }))
@@ -86,14 +88,10 @@ export const rubiksSlice = createSlice({
     new TerminalProvider()
       .provideEffects(({ effect }) => ({
         baseMoves: effect<void, Cube.BaseMoves>(
-          ({ api }) =>
-            () =>
-              api.effects.baseMoves().pipe(delay(2e3)),
+          ({ api }) => api.effects.baseMoves,
         ),
         customMoves: effect<void, Cube.Move[]>(
-          ({ api }) =>
-            () =>
-              api.effects.customMoves().pipe(delay(2e3)),
+          ({ api }) => api.effects.customMoves,
         ),
         currentBaseActionParity: effect<void, Cube.BaseActionParity>(
           ({ store }) =>
