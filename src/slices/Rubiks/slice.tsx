@@ -79,7 +79,7 @@ export const rubiksSlice = createSlice({
       })),
       customMoves: effect<void, Cube.Move[]>((axios) => ({
         predicate: () =>
-          from(axios.get(`${BASE_URL}/customMoves`)).pipe(delay(1e3)),
+          from(axios.get(`${BASE_URL}/customMoves`)).pipe(delay(0e3)),
         tags: "customMoves",
       })),
     }))
