@@ -164,7 +164,7 @@ export namespace Cube {
     action: BaseAction<A>;
   }
 
-  export type BaseMoves = { [A in Cube.Axis]: Cube.BaseMove<A>[] };
+  export type BaseMoves = { [A in Axis]: BaseMove<A>[] };
 
   export interface Move<S extends Slice = Slice> {
     key: string;
