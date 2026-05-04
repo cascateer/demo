@@ -8,7 +8,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
     {
       baseMoves: TerminalEffect<void, Cube.BaseMoves>;
       customMoves: TerminalEffect<void, Cube.Move[]>;
-      queueAction: Action<Cube.ActionConfig, void>;
+      queueAction: Action<Cube.Action, void>;
     },
     {}
   >((deps, classNames) => () => {

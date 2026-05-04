@@ -11,8 +11,8 @@ export const CubeActionsComponent = createComponent("cubeActions")
     {}
   >((deps) => () => (
     <>
-      {deps.baseActionQueue().list((action) => (
-        <div>{action.pipe(map((action) => action.join(" ")))}</div>
+      {deps.baseActionQueue().list((baseAction) => (
+        <div>{baseAction.pipe(map((baseAction) => baseAction.join(" ")))}</div>
       ))}
     </>
   ));

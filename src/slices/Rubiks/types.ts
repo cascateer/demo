@@ -1,3 +1,4 @@
+import { BrandedSerializer, Serializable } from "@cascateer/core";
 import { chunkWith } from "@cascateer/core/lib";
 import { at, isNumber } from "lodash";
 import { mod, Permutation, Twist } from "./math";
@@ -76,106 +77,98 @@ export namespace Cube {
     })(COORDS),
   ];
 
-  export interface SliceActionConfig<S extends Slice = Slice> {
+  export interface SliceActionObject<S extends Slice = Slice> {
     slice: S;
     degree?: number;
   }
 
-  export class SliceAction<S extends Slice = Slice> {
+  export class SliceAction<S extends Slice = Slice> implements Serializable<
+    SliceActionObject<Slice>
+  > {
     slice: S;
     degree: number;
 
-    constructor({ slice, degree = 1 }: SliceActionConfig<S>) {
+    constructor({ slice, degree = 1 }: SliceActionObject<S>) {
       this.slice = slice;
       this.degree = degree;
     }
 
     normalize(): SliceAction<S> {
-      return SliceAction.fromConfig({
+      return SliceAction.fromObject({
         ...this,
         degree: mod(this.degree, 4),
       });
     }
 
+    static fromObject<S extends Slice>(
+      obj: SliceActionObject<S>,
+    ): SliceAction<S> {
+      return new SliceAction(obj);
+    }
+
+    toObject(): SliceActionObject<Slice> {
+      return {
+        slice: this.slice,
+        degree: this.degree,
+      };
+    }
+
+    toJSON: BrandedSerializer<SliceActionObject<Slice>> = Serializable.toJSON(
+      SliceAction,
+      this,
+    );
+
     toString(): string {
       return [this.slice, this.degree].join("");
     }
-
-    static fromConfig<S extends Slice>(
-      config: SliceActionConfig<S>,
-    ): SliceAction<S> {
-      return new SliceAction(config);
-    }
   }
 
-  export interface BaseActionConfig<A extends Axis = Axis> extends Array<
-    SliceActionConfig<DisjointSlices[A]>
-  > {}
+  export type BaseAction<A extends Axis = Axis> = SliceAction<
+    DisjointSlices[A]
+  >[];
 
-  export class BaseAction<A extends Axis = Axis> extends Array<
-    SliceAction<DisjointSlices[A]>
-  > {
-    constructor(config: BaseActionConfig<A>) {
-      super(...config.map(SliceAction.fromConfig));
-    }
-
-    get axis(): Axis {
-      for (const axis of AXES) {
-        if (
-          this.every((action) =>
-            DISJOINT_SLICES[axis].some((slice) => slice === action.slice),
-          )
-        ) {
-          return axis;
-        }
+  export function getBaseActionAxis<A extends Axis>(
+    baseAction: BaseAction<A>,
+  ): Axis {
+    for (const axis of AXES) {
+      if (
+        baseAction.every((sliceAction) =>
+          DISJOINT_SLICES[axis].some((slice) => slice === sliceAction.slice),
+        )
+      ) {
+        return axis;
       }
-
-      throw new Error();
     }
 
-    static fromConfig<A extends Axis>(
-      config: BaseActionConfig<A>,
-    ): BaseAction<A> {
-      return new BaseAction(config);
-    }
+    throw new Error();
   }
 
-  export interface ActionConfig<S extends Slice = Slice> extends Array<
-    SliceActionConfig<S>
-  > {}
+  export type Action<S extends Slice = Slice> = SliceAction<S>[];
 
-  export class Action<S extends Slice> extends Array<SliceAction<S>> {
-    constructor(config: ActionConfig<S>) {
-      super(...config.map(SliceAction.fromConfig));
-    }
-
-    split(): BaseAction<Axis>[] {
-      return chunkWith(this, (a, b) => {
-        try {
-          return Boolean(new BaseAction([a, b]).axis);
-        } catch {
-          return false;
-        }
-      }).map(BaseAction.fromConfig);
-    }
-
-    static fromConfig<S extends Slice>(config: ActionConfig<S>): Action<S> {
-      return new Action(config);
-    }
+  export function splitAction<S extends Slice>(
+    action: Action<S>,
+  ): BaseAction<Axis>[] {
+    return chunkWith(action, (a, b) => {
+      try {
+        return Boolean(getBaseActionAxis([a, b]));
+      } catch {
+        return false;
+      }
+    }).map((sliceActions) => sliceActions.map(SliceAction.fromObject));
   }
 
   export type BaseActionParity = "odd" | "even";
 
   export interface BaseMove<A extends Axis> {
     key: string;
-    action: BaseActionConfig<A>;
+    action: BaseAction<A>;
   }
 
   export type BaseMoves = { [A in Cube.Axis]: Cube.BaseMove<A>[] };
 
   export interface Move<S extends Slice = Slice> {
     key: string;
-    action: ActionConfig<S>;
+    action: Action<S>;
   }
 
   export class Layout {
@@ -205,18 +198,19 @@ export namespace Cube {
       });
     }
 
-    apply(...sliceActions: SliceActionConfig[]): Layout {
-      const [action, ...actions] = sliceActions;
+    apply(...sliceActions: SliceActionObject[]): Layout {
+      const [sliceAction] = sliceActions;
+      [, ...sliceActions] = sliceActions;
 
-      if (action == null) {
+      if (sliceAction == null) {
         return this;
       }
 
-      if (actions.length > 0) {
-        return this.apply(action).apply(...actions);
+      if (sliceActions.length > 0) {
+        return this.apply(sliceAction).apply(...sliceActions);
       }
 
-      const { slice, degree } = SliceAction.fromConfig(action).normalize();
+      const { slice, degree } = SliceAction.fromObject(sliceAction).normalize();
 
       return degree > 0
         ? this.multiply(
