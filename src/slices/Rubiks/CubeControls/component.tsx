@@ -16,7 +16,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
       <button
         type="button"
         className={classNames.cubeControl}
-        onClick={() => deps.queueAction(action)}
+        onClick={() => deps.queueAction(new Cube.Action(action))}
       >
         {key}
       </button>

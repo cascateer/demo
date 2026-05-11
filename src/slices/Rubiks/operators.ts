@@ -29,10 +29,7 @@ export const intersectWith =
         if (baseAction != null) {
           return (
             baseAction
-              .find(
-                ({ slice }) =>
-                  slice === cubie.slices[Cube.getBaseActionAxis(baseAction)],
-              )
+              .find(({ slice }) => slice === cubie.slices[baseAction.axis])
               ?.toString() ?? ""
           );
         }

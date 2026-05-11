@@ -77,7 +77,7 @@ export namespace Cube {
     })(COORDS),
   ];
 
-  export interface SliceActionObject<S extends Slice = Slice> {
+  export interface SliceActionObject<S extends Slice> {
     slice: S;
     degree?: number;
   }
@@ -123,52 +123,92 @@ export namespace Cube {
     }
   }
 
-  export type BaseAction<A extends Axis = Axis> = SliceAction<
+  export type BaseActionObject<A extends Axis> = SliceActionObject<
     DisjointSlices[A]
   >[];
 
-  export function getBaseActionAxis<A extends Axis>(
-    baseAction: BaseAction<A>,
-  ): Axis {
-    for (const axis of AXES) {
-      if (
-        baseAction.every((sliceAction) =>
-          DISJOINT_SLICES[axis].some((slice) => slice === sliceAction.slice),
-        )
-      ) {
-        return axis;
-      }
+  export class BaseAction<A extends Axis = Axis>
+    extends Array<SliceAction<DisjointSlices[A]>>
+    implements Serializable<BaseActionObject<Axis>>
+  {
+    constructor(obj: BaseActionObject<A>) {
+      super(...obj.map(SliceAction.fromObject));
     }
 
-    throw new Error();
+    get axis(): Axis {
+      for (const axis of AXES) {
+        if (
+          this.every((sliceAction) =>
+            DISJOINT_SLICES[axis].some((slice) => slice === sliceAction.slice),
+          )
+        ) {
+          return axis;
+        }
+      }
+
+      throw new Error();
+    }
+
+    static fromObject<A extends Axis>(obj: BaseActionObject<A>): BaseAction<A> {
+      return new BaseAction(obj);
+    }
+
+    toObject(): BaseActionObject<Axis> {
+      return Array.from(this, (sliceAction) => sliceAction.toObject());
+    }
+
+    toJSON: BrandedSerializer<BaseActionObject<Axis>> = Serializable.toJSON(
+      BaseAction,
+      this,
+    );
   }
 
-  export type Action<S extends Slice = Slice> = SliceAction<S>[];
+  export type ActionObject<S extends Slice> = SliceActionObject<S>[];
 
-  export function splitAction<S extends Slice>(
-    action: Action<S>,
-  ): BaseAction<Axis>[] {
-    return chunkWith(action, (a, b) => {
-      try {
-        return Boolean(getBaseActionAxis([a, b]));
-      } catch {
-        return false;
-      }
-    }).map((sliceActions) => sliceActions.map(SliceAction.fromObject));
+  export class Action<S extends Slice = Slice>
+    extends Array<SliceAction<S>>
+    implements Serializable<ActionObject<Slice>>
+  {
+    constructor(obj: ActionObject<S>) {
+      super(...obj.map(SliceAction.fromObject));
+    }
+
+    split(): BaseAction<Axis>[] {
+      return chunkWith(this, (a, b) => {
+        try {
+          return Boolean(new BaseAction([a, b]).axis);
+        } catch {
+          return false;
+        }
+      }).map(BaseAction.fromObject);
+    }
+
+    static fromObject<S extends Slice>(obj: ActionObject<S>): Action<S> {
+      return new Action(obj);
+    }
+
+    toObject(): ActionObject<Slice> {
+      return Array.from(this, (sliceAction) => sliceAction.toObject());
+    }
+
+    toJSON: BrandedSerializer<ActionObject<Slice>> = Serializable.toJSON(
+      Action,
+      this,
+    );
   }
 
   export type BaseActionParity = "odd" | "even";
 
   export interface BaseMove<A extends Axis> {
     key: string;
-    action: BaseAction<A>;
+    action: BaseActionObject<A>;
   }
 
   export type BaseMoves = { [A in Axis]: BaseMove<A>[] };
 
   export interface Move<S extends Slice = Slice> {
     key: string;
-    action: Action<S>;
+    action: ActionObject<S>;
   }
 
   export class Layout {
@@ -198,10 +238,7 @@ export namespace Cube {
       });
     }
 
-    apply(...sliceActions: SliceActionObject[]): Layout {
-      const [sliceAction] = sliceActions;
-      [, ...sliceActions] = sliceActions;
-
+    apply(...[sliceAction, ...sliceActions]: SliceAction[]): Layout {
       if (sliceAction == null) {
         return this;
       }
@@ -210,14 +247,16 @@ export namespace Cube {
         return this.apply(sliceAction).apply(...sliceActions);
       }
 
-      const { slice, degree } = SliceAction.fromObject(sliceAction).normalize();
+      const { slice, degree } = sliceAction.normalize();
 
       return degree > 0
         ? this.multiply(
-            SLICE_LAYOUTS[slice].apply({
-              slice,
-              degree: degree - 1,
-            }),
+            SLICE_LAYOUTS[slice].apply(
+              SliceAction.fromObject({
+                slice,
+                degree: degree - 1,
+              }),
+            ),
           )
         : this;
     }
