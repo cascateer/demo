@@ -132,7 +132,7 @@ export namespace Cube {
     implements Serializable<BaseActionObject<Axis>>
   {
     constructor(obj: BaseActionObject<A>) {
-      super(...obj.map(SliceAction.fromObject));
+      super(...Array.from(obj, SliceAction.fromObject));
     }
 
     get axis(): Axis {
@@ -170,7 +170,7 @@ export namespace Cube {
     implements Serializable<ActionObject<Slice>>
   {
     constructor(obj: ActionObject<S>) {
-      super(...obj.map(SliceAction.fromObject));
+      super(...Array.from(obj, SliceAction.fromObject));
     }
 
     split(): BaseAction<Axis>[] {

@@ -158,6 +158,7 @@ export const rubiksSlice = createSlice({
           ({ store }) =>
             new CubeActionsComponent({
               baseActionQueue: store.effects.baseActionQueue,
+              currentBaseActionIndex: store.effects.currentBaseActionIndex,
             }),
         ),
         CubeControls: component(

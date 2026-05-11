@@ -1,5 +1,5 @@
 import { createComponent, StoreEffect } from "@cascateer/core";
-import { map } from "rxjs";
+import { combineLatest, map } from "rxjs";
 import { Cube } from "../types";
 
 export const CubeActionsComponent = createComponent("cubeActions")
@@ -7,12 +7,29 @@ export const CubeActionsComponent = createComponent("cubeActions")
   .withTemplate<
     {
       baseActionQueue: StoreEffect<Cube.BaseAction[]>;
+      currentBaseActionIndex: StoreEffect<number>;
     },
     {}
-  >((deps) => () => (
+  >((deps, { cubeBaseAction }) => () => (
     <>
-      {deps.baseActionQueue().list((baseAction) => (
-        <div>{baseAction.pipe(map((baseAction) => baseAction.join(" ")))}</div>
+      {deps.baseActionQueue().list((baseAction, index) => (
+        <div>
+          {combineLatest([baseAction, deps.currentBaseActionIndex()]).pipe(
+            map(([baseAction, currentIndex]) => (
+              <div
+                className={cubeBaseAction}
+                data-playing={index === currentIndex}
+              >
+                {baseAction.map(({ slice, degree }) => (
+                  <>
+                    <sub>{slice}</sub>
+                    <sup data-value={degree === 1 ? void 0 : degree} />
+                  </>
+                ))}
+              </div>
+            )),
+          )}
+        </div>
       ))}
     </>
   ));
