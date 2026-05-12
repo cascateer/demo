@@ -58,7 +58,7 @@ export const rubiksSlice = createSlice({
         queueAction: action<Cube.Action>(({ baseActionQueue }) =>
           baseActionQueue.update(
             (action) => (baseActionQueue) =>
-              baseActionQueue.concat(action.split()),
+              baseActionQueue.concat((console.log(action), action).split()),
           ),
         ),
         incrementCurrentBaseActionIndex: action<void>(
