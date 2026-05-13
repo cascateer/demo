@@ -21,4 +21,8 @@ export default {
       localsConvention: "camelCaseOnly",
     },
   },
+
+  optimizeDeps: {
+    noDiscovery: true,
+  },
 } satisfies UserConfig;
