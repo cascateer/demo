@@ -14,7 +14,7 @@
   "devDependencies": {
     "@types/lodash": "^4.17.24",
     "@types/object-hash": "^3.0.6",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "@types/three": "^0.184.1",
     "sass-embedded": "^1.99.0",
     "typescript": "~6.0.3",
@@ -22,7 +22,7 @@
     "vite-plugin-sass-dts": "^1.3.37"
   },
   "dependencies": {
-    "@cascateer/core": "^2.3.28",
+    "@cascateer/core": "^2.3.29",
     "axios": "^1.16.1",
     "lodash": "^4.18.1",
     "rxjs": "^7.8.2",
