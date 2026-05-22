@@ -21,10 +21,4 @@ export default {
       localsConvention: "camelCaseOnly",
     },
   },
-
-  build: {
-    rollupOptions: {
-      external: ["/node_modules/@cascateer/core/src/serializable.ts"],
-    },
-  },
 } satisfies UserConfig;
