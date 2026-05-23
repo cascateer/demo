@@ -11,7 +11,7 @@ import { CubeControlsComponent } from "./CubeControls/component";
 import { mod } from "./math";
 import { Cube } from "./types";
 
-const BASE_URL = "https://server-jp2n.onrender.com";
+const BASE_URL = "https://api.cascateer.dev";
 
 defineCustomProperties({
   "--cubie-coord-0": {
