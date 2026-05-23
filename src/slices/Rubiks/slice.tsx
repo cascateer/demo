@@ -4,14 +4,14 @@ import {
   defineCustomProperties,
 } from "@cascateer/core";
 import axios from "axios";
-import { combineLatest, delay, from, map } from "rxjs";
+import { combineLatest, delay, from, map, tap } from "rxjs";
 import { CubeComponent } from "./Cube/component";
 import { CubeActionsComponent } from "./CubeActions/component";
 import { CubeControlsComponent } from "./CubeControls/component";
 import { mod } from "./math";
 import { Cube } from "./types";
 
-const BASE_URL = "https://server-jp2n.onrender.com/rubiks";
+const BASE_URL = "https://server-jp2n.onrender.com";
 
 defineCustomProperties({
   "--cubie-coord-0": {
@@ -74,13 +74,24 @@ export const rubiksSlice = createSlice({
     .provideEffects(({ effect }) => ({
       baseMoves: effect<void, Cube.BaseMoves>((axios) => ({
         predicate: () =>
-          from(axios.get(`${BASE_URL}/baseMoves`)).pipe(delay(1e3)),
+          from(axios.get(`${BASE_URL}/rubiks/baseMoves`)).pipe(delay(1e3)),
         tags: "baseMoves",
       })),
       customMoves: effect<void, Cube.Move[]>((axios) => ({
         predicate: () =>
-          from(axios.get(`${BASE_URL}/customMoves`)).pipe(delay(0e3)),
+          from(axios.get(`${BASE_URL}/rubiks/customMoves`)).pipe(delay(0e3)),
         tags: "customMoves",
+      })),
+    }))
+    .provideActions(({ action }) => ({
+      youtubeAuth: action<void, void>((axios) => ({
+        predicate: () =>
+          from(
+            axios.get(`${BASE_URL}/youtube/auth`, { withCredentials: true }),
+          ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
+      })),
+      youtubeTest: action<void, void>((axios) => ({
+        predicate: () => from(axios.get(`${BASE_URL}/youtube/test`)),
       })),
     }))
     .complete(),
@@ -162,11 +173,13 @@ export const rubiksSlice = createSlice({
             }),
         ),
         CubeControls: component(
-          ({ store, terminal }) =>
+          ({ store, api, terminal }) =>
             new CubeControlsComponent({
               baseMoves: terminal.effects.baseMoves,
               customMoves: terminal.effects.customMoves,
               queueAction: store.actions.queueAction,
+              youtubeAuth: api.actions.youtubeAuth,
+              youtubeTest: api.actions.youtubeTest,
             }),
         ),
       }))
