@@ -11,7 +11,7 @@ import { CubeControlsComponent } from "./CubeControls/component";
 import { mod } from "./math";
 import { Cube } from "./types";
 
-const BASE_URL = "https://api.cascateer.dev";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 defineCustomProperties({
   "--cubie-coord-0": {
@@ -74,12 +74,14 @@ export const rubiksSlice = createSlice({
     .provideEffects(({ effect }) => ({
       baseMoves: effect<void, Cube.BaseMoves>((axios) => ({
         predicate: () =>
-          from(axios.get(`${BASE_URL}/rubiks/baseMoves`)).pipe(delay(1e3)),
+          from(axios.get(`${API_BASE_URL}/rubiks/baseMoves`)).pipe(delay(1e3)),
         tags: "baseMoves",
       })),
       customMoves: effect<void, Cube.Move[]>((axios) => ({
         predicate: () =>
-          from(axios.get(`${BASE_URL}/rubiks/customMoves`)).pipe(delay(0e3)),
+          from(axios.get(`${API_BASE_URL}/rubiks/customMoves`)).pipe(
+            delay(0e3),
+          ),
         tags: "customMoves",
       })),
     }))
@@ -87,11 +89,13 @@ export const rubiksSlice = createSlice({
       youtubeAuth: action<void, void>((axios) => ({
         predicate: () =>
           from(
-            axios.get(`${BASE_URL}/youtube/auth`, { withCredentials: true }),
+            axios.get(`${API_BASE_URL}/youtube/auth`, {
+              withCredentials: true,
+            }),
           ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
       })),
       youtubeTest: action<void, void>((axios) => ({
-        predicate: () => from(axios.get(`${BASE_URL}/youtube/test`)),
+        predicate: () => from(axios.get(`${API_BASE_URL}/youtube/test`)),
       })),
     }))
     .complete(),
