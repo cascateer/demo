@@ -86,6 +86,14 @@ export const rubiksSlice = createSlice({
       })),
     }))
     .provideActions(({ action }) => ({
+      spotifyAuth: action<void, void>((axios) => ({
+        predicate: () =>
+          from(
+            axios.get(`${API_BASE_URL}/spotify/auth`, {
+              withCredentials: true,
+            }),
+          ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
+      })),
       youtubeAuth: action<void, void>((axios) => ({
         predicate: () =>
           from(
@@ -182,6 +190,7 @@ export const rubiksSlice = createSlice({
               baseMoves: terminal.effects.baseMoves,
               customMoves: terminal.effects.customMoves,
               queueAction: store.actions.queueAction,
+              spotifyAuth: api.actions.spotifyAuth,
               youtubeAuth: api.actions.youtubeAuth,
               youtubeTest: api.actions.youtubeTest,
             }),

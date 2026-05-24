@@ -9,6 +9,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
       baseMoves: TerminalEffect<void, Cube.BaseMoves>;
       customMoves: TerminalEffect<void, Cube.Move[]>;
       queueAction: Action<Cube.Action, void>;
+      spotifyAuth: Action<void, void>;
       youtubeAuth: Action<void, void>;
       youtubeTest: Action<void, void>;
     },
@@ -26,10 +27,22 @@ export const CubeControlsComponent = createComponent("cubeControls")
 
     return (
       <>
-        <button type="button" onClick={() => deps.youtubeAuth()}>
+        <button
+          className={classNames.cubeControl}
+          type="button"
+          onClick={() => deps.spotifyAuth()}
+        >
+          Spotify Auth
+        </button>
+        <button
+          className={classNames.cubeControl}
+          type="button"
+          onClick={() => deps.youtubeAuth()}
+        >
           YouTube Auth
         </button>
         <button
+          className={classNames.cubeControl}
           type="button"
           onClick={() => deps.youtubeTest().then(console.log)}
         >
