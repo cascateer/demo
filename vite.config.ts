@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import type { UserConfig } from "vite";
 import sassDts from "vite-plugin-sass-dts";
 
@@ -19,6 +20,13 @@ export default {
     modules: {
       scopeBehaviour: "local",
       localsConvention: "camelCaseOnly",
+    },
+  },
+
+  server: {
+    https: {
+      pfx: readFileSync("../server/ssl.pfx"),
+      passphrase: "passphrase",
     },
   },
 } satisfies UserConfig;
