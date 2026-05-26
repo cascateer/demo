@@ -25,7 +25,7 @@ export default {
 
   server: {
     https: {
-      pfx: readFileSync("../server/ssl.pfx"),
+      pfx: readFileSync("./ssl.pfx"),
       passphrase: "passphrase",
     },
   },
