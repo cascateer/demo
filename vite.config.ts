@@ -24,6 +24,7 @@ export default {
   },
 
   server: {
+    port: 4173,
     https: {
       pfx: readFileSync("./ssl.pfx"),
       passphrase: "passphrase",
