@@ -73,16 +73,16 @@ which in general is a predicate
 
 ```tsx
 <
-    Context extends Dictionary<Effect<any, any> | Action<any, any>>,
+    Model extends Dictionary<Effect<any, any> | Action<any, any>>,
     Props extends JSX.Props
->(context: Context): JSX.Component<Props>
+>(model: Model): JSX.Component<Props>
 ```
 
-Any Component is built from two data sources, 1) a dynamic **Context**, and 2) static **(JSX) Props**.
+Any Component is built from two data sources, 1) a dynamic **Model**, and 2) static **(JSX) Props**.
 
 Props build a kind of secondary means for (static) configuration, like setting up the counter seed in our example.
 
-The Context basically is the Component's source of any kind of mutable, global data[^1]. In order to understand what it is and how it works, we first need to look at
+The Model basically is the Component's source of any kind of mutable, global data[^1]. In order to understand what it is and how it works, we first need to look at
 
 [^1]: As is going to be specified more clearly later.
 
@@ -96,7 +96,7 @@ In technical terms, an **Effect** is simply an (unary) **Observable**-constructo
 
 In mathematical terms, we can think of this as of families (or parametrizations) of **ObservableLikes**.
 
-In more practical terms, as we've already seen, Effects and Actions make up a Component's Context. So let's try and and bring our `CounterComponent` to life, by removing the static Props and adding a dynamic data source instead:
+In more practical terms, as we've already seen, Effects and Actions make up a Component's Model. So let's try and and bring our `CounterComponent` to life, by removing the static Props and adding a dynamic data source instead:
 
 ```tsx
 const CounterComponent = createComponent("counter").withTemplate<
@@ -122,7 +122,7 @@ counter().pipe(map((value) => `${value}units`));
 
 But we need to setup `counter` anyway; and the more generic an Effect or Action is, the more will the effort pay off, once our Components get numerous and heavy.
 
-The three remaining parts of our SliceConfig do in fact serve one objective only: To provide the collection of tailored, ready-made Effects and Actions we will be needing inside our Components, in order to 1) provide a necessary Context, and 2) keep the view template clean of any kind of exhaustive data logic: the view being just the tip of the (data) iceberg. Effects and Actions are supposed to appear as _terminal_ nodes, as far as possible.
+The three remaining parts of our SliceConfig do in fact serve one objective only: To provide the collection of tailored, ready-made Effects and Actions we will be needing inside our Components, in order to 1) provide a necessary Model, and 2) keep the view template clean of any kind of exhaustive data logic: the view being just the tip of the (data) iceberg. Effects and Actions are supposed to appear as _terminal_ nodes, as far as possible.
 
 <h2 id="1-4-modeleffects-and-actions">1.4 StoreEffects and -Actions <a href="#toc">↑</a></h2>
 
