@@ -14,12 +14,12 @@ export const CubeControlsComponent = createComponent("cubeControls")
       youtubeTest: Action<void, void>;
     },
     {}
-  >((deps, classNames) => () => {
+  >((model, classNames) => () => {
     const CubeControl = ({ move: { key, action } }: { move: Cube.Move }) => (
       <button
         type="button"
         className={classNames.cubeControl}
-        onClick={() => deps.queueAction(new Cube.Action(action))}
+        onClick={() => model.queueAction(new Cube.Action(action))}
       >
         {key}
       </button>
@@ -30,29 +30,29 @@ export const CubeControlsComponent = createComponent("cubeControls")
         <button
           className={classNames.cubeControl}
           type="button"
-          onClick={() => deps.spotifyAuth()}
+          onClick={() => model.spotifyAuth()}
         >
           Spotify Auth
         </button>
         <button
           className={classNames.cubeControl}
           type="button"
-          onClick={() => deps.youtubeAuth()}
+          onClick={() => model.youtubeAuth()}
         >
           YouTube Auth
         </button>
         <button
           className={classNames.cubeControl}
           type="button"
-          onClick={() => deps.youtubeTest().then(console.log)}
+          onClick={() => model.youtubeTest().then(console.log)}
         >
           YouTube Test
         </button>
         <div
           className={classNames.cubeControls}
-          data-loading={deps.baseMoves().pending}
+          data-loading={model.baseMoves().pending}
         >
-          {deps.baseMoves().pipe(
+          {model.baseMoves().pipe(
             map((baseMoves) =>
               Object.values(baseMoves)
                 .flat()
@@ -62,9 +62,9 @@ export const CubeControlsComponent = createComponent("cubeControls")
         </div>
         <div
           className={classNames.cubeControls}
-          data-loading={deps.customMoves().pending}
+          data-loading={model.customMoves().pending}
         >
-          {deps
+          {model
             .customMoves()
             .pipe(
               map((customMoves) =>
