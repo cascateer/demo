@@ -25,7 +25,7 @@ export const CubeComponent = createComponent("cube")
       layout: TerminalEffect<void, Cube.Layout>;
     },
     {}
-  >((model, classNames) => () => {
+  >((ctx, classNames) => () => {
     const mouseDownOrTouchStart = new Subject<MouseEvent | TouchEvent>();
     const mouseUpOrTouchEnd = new Subject<MouseEvent | TouchEvent>();
     const mouseMoveOrTouchMove = new Subject<MouseEvent | TouchEvent>();
@@ -33,7 +33,7 @@ export const CubeComponent = createComponent("cube")
     const animationEnd = new Subject<void>();
 
     animationEnd.pipe(bufferCount(27)).subscribe({
-      next: () => model.incrementCurrentBaseActionIndex(),
+      next: () => ctx.incrementCurrentBaseActionIndex(),
     });
 
     return (
@@ -66,8 +66,8 @@ export const CubeComponent = createComponent("cube")
             <div
               className={classNames.cubieSpace}
               data-cubie-slice-action={combineLatest([
-                model.currentBaseAction().pipe(intersectWith(cubie)),
-                model.currentBaseActionParity(),
+                ctx.currentBaseAction().pipe(intersectWith(cubie)),
+                ctx.currentBaseActionParity(),
               ]).pipe(
                 map(([action, parity]) => {
                   if (action != null) {
@@ -94,7 +94,7 @@ export const CubeComponent = createComponent("cube")
                   >
                     <div
                       className={classNames.cubieFacelet}
-                      data-color={model
+                      data-color={ctx
                         .layout()
                         .pipe(toCubieFaceletColor(cubie, face))}
                     />

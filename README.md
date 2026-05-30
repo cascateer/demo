@@ -4,8 +4,8 @@
    1. [App and Slices](#1-1-app-and-slices)
    2. [Components](#1-2-components)
    3. [Effects and Actions](#1-3-effects-and-actions)
-   4. [StoreEffects and -Actions](#1-4-modeleffects-and-actions)
-   5. [ApiEffects and -Actions](#1-5-ApiEffects-and-actions)
+   4. [StoreEffects and -Actions](#1-4-storeeffects-and-actions)
+   5. [ApiEffects and -Actions](#1-5-apieffects-and-actions)
    6. [TerminalEffects and -Actions](#1-6-terminaleffects-and-actions)
 
 <h2 id="1-basic-terms-and-concepts">1. Basic terms and concepts <a href="#toc">↑</a></h2>
@@ -73,16 +73,16 @@ which in general is a predicate
 
 ```tsx
 <
-    Model extends Dictionary<Effect<any, any> | Action<any, any>>,
+    Context extends Dictionary<Effect<any, any> | Action<any, any>>,
     Props extends JSX.Props
->(model: Model): JSX.Component<Props>
+>(ctx: Context): JSX.Component<Props>
 ```
 
-Any Component is built from two data sources, 1) a dynamic **Model**, and 2) static **(JSX) Props**.
+Any Component is built from two data sources, 1) a dynamic **Context**, and 2) static **(JSX) Props**.
 
 Props build a kind of secondary means for (static) configuration, like setting up the counter seed in our example.
 
-The Model basically is the Component's source of any kind of mutable, global data[^1]. In order to understand what it is and how it works, we first need to look at
+The Context basically is the Component's source of any kind of mutable, global data[^1]. In order to understand what it is and how it works, we first need to look at
 
 [^1]: As is going to be specified more clearly later.
 
@@ -96,7 +96,7 @@ In technical terms, an **Effect** is simply an (unary) **Observable**-constructo
 
 In mathematical terms, we can think of this as of families (or parametrizations) of **ObservableLikes**.
 
-In more practical terms, as we've already seen, Effects and Actions make up a Component's Model. So let's try and and bring our `CounterComponent` to life, by removing the static Props and adding a dynamic data source instead:
+In more practical terms, as we've already seen, Effects and Actions make up a Component's Context. So let's try and and bring our `CounterComponent` to life, by removing the static Props and adding a dynamic data source instead:
 
 ```tsx
 const CounterComponent = createComponent("counter").withTemplate<
@@ -122,9 +122,9 @@ counter().pipe(map((value) => `${value}units`));
 
 But we need to setup `counter` anyway; and the more generic an Effect or Action is, the more will the effort pay off, once our Components get numerous and heavy.
 
-The three remaining parts of our SliceConfig do in fact serve one objective only: To provide the collection of tailored, ready-made Effects and Actions we will be needing inside our Components, in order to 1) provide a necessary Model, and 2) keep the view template clean of any kind of exhaustive data logic: the view being just the tip of the (data) iceberg. Effects and Actions are supposed to appear as _terminal_ nodes, as far as possible.
+The three remaining parts of our SliceConfig do in fact serve one objective only: To provide the collection of tailored, ready-made Effects and Actions we will be needing inside our Components, in order to 1) provide a necessary Context, and 2) keep the view template clean of any kind of exhaustive data logic: the view being just the tip of the (data) iceberg. Effects and Actions are supposed to appear as _terminal_ nodes, as far as possible.
 
-<h2 id="1-4-modeleffects-and-actions">1.4 StoreEffects and -Actions <a href="#toc">↑</a></h2>
+<h2 id="1-4-storeeffects-and-actions">1.4 StoreEffects and -Actions <a href="#toc">↑</a></h2>
 
 Our example already suggests the following relationship of Effects and Actions, taken from a standard dictionary:
 
@@ -143,7 +143,7 @@ Querying data from the Store is done using a special kind of Observable, a **Sig
 
 Such a Signal can also induce a state transition, by emitting a special kind of **TransformAction**; and in fact the Store state is comprised exactly of 1) an initial **SeedAction**, and 2) an ordered sequence of TransformActions.
 
-<h2 id="1-5-ApiEffects-and-actions">1.5 ApiEffects and -Actions <a href="#toc">↑</a></h2>
+<h2 id="1-5-apieffects-and-actions">1.5 ApiEffects and -Actions <a href="#toc">↑</a></h2>
 
 Store and **Api** are (strictly) complementary in the sense that while the Store provides access to internal app data, the Api is the designated external interface of our app. In fact, similar to the Store, the Api is a collection of a special kind of **(Api)Effects and -Actions**, stemming from **Memoizable**- and **Interceptable**-constructors, respectively. Store and Api are disjoint: Their respective Effects and Actions are independent of each other.
 

@@ -10,11 +10,11 @@ export const CubeActionsComponent = createComponent("cubeActions")
       currentBaseActionIndex: StoreEffect<number>;
     },
     {}
-  >((model, { cubeBaseAction }) => () => (
+  >((ctx, { cubeBaseAction }) => () => (
     <>
-      {model.baseActionQueue().list((baseAction, index) => (
+      {ctx.baseActionQueue().list((baseAction, index) => (
         <div>
-          {combineLatest([baseAction, model.currentBaseActionIndex()]).pipe(
+          {combineLatest([baseAction, ctx.currentBaseActionIndex()]).pipe(
             map(([baseAction, currentIndex]) => (
               <div
                 className={cubeBaseAction}
