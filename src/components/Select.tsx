@@ -1,4 +1,5 @@
 import { MaybeObservable } from "@cascateer/core";
+import { flatMap } from "@cascateer/core/operators";
 import {
   asEnumerable,
   asObservable,
@@ -6,8 +7,7 @@ import {
   Enumerator,
   nonNullable,
   nthArg,
-} from "@cascateer/core/lib";
-import { flatMap } from "@cascateer/core/operators";
+} from "@cascateer/lib";
 import { tap } from "lodash";
 import {
   combineLatest,

@@ -1,4 +1,4 @@
-import { nonNullable } from "@cascateer/core/lib";
+import { nonNullable } from "@cascateer/lib";
 import {
   at,
   constant,

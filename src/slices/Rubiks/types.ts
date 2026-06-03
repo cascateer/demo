@@ -1,5 +1,5 @@
 import { BrandedSerializer, Serializable } from "@cascateer/core";
-import { chunkWith } from "@cascateer/core/lib";
+import { chunkWith } from "@cascateer/lib";
 import { at, isNumber } from "lodash";
 import { mod, Permutation, Twist } from "./math";
 

@@ -14,16 +14,17 @@
   "devDependencies": {
     "@types/lodash": "^4.17.24",
     "@types/object-hash": "^3.0.6",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "@types/three": "^0.184.1",
     "sass-embedded": "^1.100.0",
     "typescript": "~6.0.3",
-    "vite": "^8.0.14",
+    "vite": "^8.0.16",
     "vite-plugin-sass-dts": "^1.3.37"
   },
   "dependencies": {
-    "@cascateer/core": "^2.3.50",
-    "axios": "^1.16.1",
+    "@cascateer/core": "^2.3.55",
+    "@cascateer/lib": "^1.0.4",
+    "axios": "^1.17.0",
     "lodash": "^4.18.1",
     "rxjs": "^7.8.2",
     "three": "^0.184.0"
