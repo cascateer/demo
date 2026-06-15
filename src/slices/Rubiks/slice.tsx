@@ -103,7 +103,12 @@ export const rubiksSlice = createSlice({
           ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
       })),
       youtubeTest: action<void, void>((axios) => ({
-        predicate: () => from(axios.get(`${API_BASE_URL}/youtube/test`)),
+        predicate: () =>
+          from(
+            axios.get(
+              `${API_BASE_URL}/youtube/query?q=intro ${encodeURIComponent("Rey&Kjavik")}&playlistId=UCuGdq56L4viJ_U7UiNnhb2A`,
+            ),
+          ),
       })),
     }))
     .complete(),
