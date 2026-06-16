@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { resolve } from "path";
 import type { UserConfig } from "vite";
 import sassDts from "vite-plugin-sass-dts";
 
@@ -8,6 +9,12 @@ export default {
       legacyFileFormat: true,
     }),
   ],
+
+  resolve: {
+    alias: {
+      "@sterio": resolve(__dirname, "../sterio/api"),
+    },
+  },
 
   oxc: {
     jsx: {

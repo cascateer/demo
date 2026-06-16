@@ -14,11 +14,11 @@ export const CubeControlsComponent = createComponent("cubeControls")
       youtubeTest: Action<void, void>;
     },
     {}
-  >((ctx, classNames) => () => {
+  >((ctx, cn) => () => {
     const CubeControl = ({ move: { key, action } }: { move: Cube.Move }) => (
       <button
         type="button"
-        className={classNames.cubeControl}
+        className={cn.cubeControl}
         onClick={() => ctx.queueAction(new Cube.Action(action))}
       >
         {key}
@@ -28,30 +28,27 @@ export const CubeControlsComponent = createComponent("cubeControls")
     return (
       <>
         <button
-          className={classNames.cubeControl}
+          className={cn.cubeControl}
           type="button"
           onClick={() => ctx.spotifyAuth()}
         >
           Spotify Auth
         </button>
         <button
-          className={classNames.cubeControl}
+          className={cn.cubeControl}
           type="button"
           onClick={() => ctx.youtubeAuth()}
         >
           YouTube Auth
         </button>
         <button
-          className={classNames.cubeControl}
+          className={cn.cubeControl}
           type="button"
           onClick={() => ctx.youtubeTest().then(console.log)}
         >
           YouTube Test
         </button>
-        <div
-          className={classNames.cubeControls}
-          data-loading={ctx.baseMoves().pending}
-        >
+        <div className={cn.cubeControls} data-loading={ctx.baseMoves().pending}>
           {ctx.baseMoves().pipe(
             map((baseMoves) =>
               Object.values(baseMoves)
@@ -61,7 +58,7 @@ export const CubeControlsComponent = createComponent("cubeControls")
           )}
         </div>
         <div
-          className={classNames.cubeControls}
+          className={cn.cubeControls}
           data-loading={ctx.customMoves().pending}
         >
           {ctx

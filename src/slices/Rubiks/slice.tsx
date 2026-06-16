@@ -41,12 +41,12 @@ declare global {
   }
 }
 
-export const rubiksSlice = createSlice({
-  data: {
+export const rubiksSlice = createSlice()
+  .withData({
     baseActionQueue: new Array<Cube.BaseAction>(),
     currentBaseActionIndex: 0,
-  },
-  store: ({ StoreProvider }) =>
+  })
+  .withStore(({ StoreProvider }) =>
     new StoreProvider()
       .provideSignals(({ signal }) => ({
         baseActionQueue: signal(({ data }) => data.property("baseActionQueue")),
@@ -70,49 +70,54 @@ export const rubiksSlice = createSlice({
         ),
       }))
       .complete(),
-  api: new ApiProvider(axios)
-    .provideEffects(({ effect }) => ({
-      baseMoves: effect<void, Cube.BaseMoves>((axios) => ({
-        predicate: () =>
-          from(axios.get(`${API_BASE_URL}/rubiks/baseMoves`)).pipe(delay(1e3)),
-        tags: "baseMoves",
-      })),
-      customMoves: effect<void, Cube.Move[]>((axios) => ({
-        predicate: () =>
-          from(axios.get(`${API_BASE_URL}/rubiks/customMoves`)).pipe(
-            delay(0e3),
-          ),
-        tags: "customMoves",
-      })),
-    }))
-    .provideActions(({ action }) => ({
-      spotifyAuth: action<void, void>((axios) => ({
-        predicate: () =>
-          from(
-            axios.get(`${API_BASE_URL}/spotify/auth`, {
-              withCredentials: true,
-            }),
-          ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
-      })),
-      youtubeAuth: action<void, void>((axios) => ({
-        predicate: () =>
-          from(
-            axios.get(`${API_BASE_URL}/youtube/auth`, {
-              withCredentials: true,
-            }),
-          ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
-      })),
-      youtubeTest: action<void, void>((axios) => ({
-        predicate: () =>
-          from(
-            axios.get(
-              `${API_BASE_URL}/youtube/query?q=intro ${encodeURIComponent("Rey&Kjavik")}&playlistId=UCuGdq56L4viJ_U7UiNnhb2A`,
+  )
+  .withApi(
+    new ApiProvider(axios)
+      .provideEffects(({ effect }) => ({
+        baseMoves: effect<void, Cube.BaseMoves>((axios) => ({
+          predicate: () =>
+            from(axios.get(`${API_BASE_URL}/rubiks/baseMoves`)).pipe(
+              delay(1e3),
             ),
-          ),
-      })),
-    }))
-    .complete(),
-  terminal: ({ TerminalProvider }) =>
+          tags: "baseMoves",
+        })),
+        customMoves: effect<void, Cube.Move[]>((axios) => ({
+          predicate: () =>
+            from(axios.get(`${API_BASE_URL}/rubiks/customMoves`)).pipe(
+              delay(0e3),
+            ),
+          tags: "customMoves",
+        })),
+      }))
+      .provideActions(({ action }) => ({
+        spotifyAuth: action<void, void>((axios) => ({
+          predicate: () =>
+            from(
+              axios.get(`${API_BASE_URL}/spotify/auth`, {
+                withCredentials: true,
+              }),
+            ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
+        })),
+        youtubeAuth: action<void, void>((axios) => ({
+          predicate: () =>
+            from(
+              axios.get(`${API_BASE_URL}/youtube/auth`, {
+                withCredentials: true,
+              }),
+            ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
+        })),
+        youtubeTest: action<void, void>((axios) => ({
+          predicate: () =>
+            from(
+              axios.get(
+                `${API_BASE_URL}/youtube/query?q=intro ${encodeURIComponent("Rey&Kjavik")}&playlistId=UCuGdq56L4viJ_U7UiNnhb2A`,
+              ),
+            ),
+        })),
+      }))
+      .complete(),
+  )
+  .withTerminal(({ TerminalProvider }) =>
     new TerminalProvider()
       .provideEffects(({ effect }) => ({
         baseMoves: effect<void, Cube.BaseMoves>(
@@ -168,7 +173,8 @@ export const rubiksSlice = createSlice({
         ),
       }))
       .complete(),
-  components: ({ ComponentsProvider }) =>
+  )
+  .withComponents(({ ComponentsProvider }) =>
     new ComponentsProvider()
       .provideComponents(({ component }) => ({
         Cube: component(
@@ -202,11 +208,11 @@ export const rubiksSlice = createSlice({
         ),
       }))
       .complete(),
-  render: ({ Cube, CubeActions, CubeControls }) => (
+  )
+  .withTemplate(({ Cube, CubeActions, CubeControls }) => (
     <>
       <Cube />
       <CubeActions />
       <CubeControls />
     </>
-  ),
-});
+  ));

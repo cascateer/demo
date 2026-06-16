@@ -25,7 +25,7 @@ export const CubeComponent = createComponent("cube")
       layout: TerminalEffect<void, Cube.Layout>;
     },
     {}
-  >((ctx, classNames) => () => {
+  >((ctx, cn) => () => {
     const mouseDownOrTouchStart = new Subject<MouseEvent | TouchEvent>();
     const mouseUpOrTouchEnd = new Subject<MouseEvent | TouchEvent>();
     const mouseMoveOrTouchMove = new Subject<MouseEvent | TouchEvent>();
@@ -38,7 +38,7 @@ export const CubeComponent = createComponent("cube")
 
     return (
       <div
-        className={classNames.cubeSpace}
+        className={cn.cubeSpace}
         onMouseDown={mouseDownOrTouchStart}
         onTouchStart={mouseDownOrTouchStart}
         onMouseUp={mouseUpOrTouchEnd}
@@ -49,7 +49,7 @@ export const CubeComponent = createComponent("cube")
         onTouchCancel={mouseLeaveOrTouchCancel}
       >
         <div
-          className={classNames.cube}
+          className={cn.cube}
           style={{
             transform: mouseMoveOrTouchMove.pipe(
               windowToggle(mouseDownOrTouchStart, () =>
@@ -64,7 +64,7 @@ export const CubeComponent = createComponent("cube")
         >
           {Cube.CUBIES.map((cubie) => (
             <div
-              className={classNames.cubieSpace}
+              className={cn.cubieSpace}
               data-cubie-slice-action={combineLatest([
                 ctx.currentBaseAction().pipe(intersectWith(cubie)),
                 ctx.currentBaseActionParity(),
@@ -78,7 +78,7 @@ export const CubeComponent = createComponent("cube")
               onAnimationEnd={() => animationEnd.next()}
             >
               <div
-                className={classNames.cubie}
+                className={cn.cubie}
                 style={{
                   "--cubie-coord-0": cubie.coords[0].toString(),
                   "--cubie-coord-1": cubie.coords[1].toString(),
@@ -86,14 +86,9 @@ export const CubeComponent = createComponent("cube")
                 }}
               >
                 {Cube.FACES.map((face) => (
-                  <div
-                    className={[
-                      classNames.cubieFace,
-                      classNames[`cubieFace${face}`],
-                    ]}
-                  >
+                  <div className={[cn.cubieFace, cn[`cubieFace${face}`]]}>
                     <div
-                      className={classNames.cubieFacelet}
+                      className={cn.cubieFacelet}
                       data-color={ctx
                         .layout()
                         .pipe(toCubieFaceletColor(cubie, face))}
