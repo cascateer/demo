@@ -65,9 +65,13 @@ export function Select<T>(props: SelectProps<T>) {
             )
             .subscribe(onChange);
 
-          combineLatest([options, asObservable(props.value)]).subscribe({
-            next: ([options, selectedKey]) => {
+          combineLatest([options, asObservable(props.id)]).subscribe({
+            next: ([options, id]) => {
               select.replaceChildren(
+                createElement("option", {
+                  innerText: id?.toString() ?? "",
+                  disabled: true,
+                }),
                 ...options.map((option, index) =>
                   createElement("option", {
                     value: enumerate(option, index).toString(),
@@ -77,9 +81,7 @@ export function Select<T>(props: SelectProps<T>) {
               );
 
               select.selectedIndex =
-                selectedKey != null
-                  ? options.map(enumerate).indexOf(selectedKey)
-                  : -1;
+                (id != null ? options.map(enumerate).indexOf(id) : -1) + 1;
             },
           });
 

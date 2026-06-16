@@ -25,7 +25,7 @@ export const ImportComponent = createComponent("import")
       <div>
         <QuerySelect
           query={ctx.youtubeMusicSearchAlbums}
-          value={ctx.youtubeMusicAlbumId()}
+          id={ctx.youtubeMusicAlbumId()}
           name="youtube-music-search-albums"
           enumerate={property("albumId")}
           text={property("text")}
@@ -33,7 +33,7 @@ export const ImportComponent = createComponent("import")
         />
         <QuerySelect
           query={ctx.youtubeMusicSearchAlbums}
-          value={ctx.youtubeMusicAlbumId()}
+          id={ctx.youtubeMusicAlbumId()}
           name="youtube-music-search-albums"
           enumerate={property("albumId")}
           text={property("text")}
