@@ -20,7 +20,7 @@ export const ImportComponent = createComponent("import")
       >;
     },
     {}
-  >((ctx, cn) => () => {
+  >((ctx, classNames) => () => {
     return (
       <QuerySelect
         query={ctx.ytMusicSearchAlbums}

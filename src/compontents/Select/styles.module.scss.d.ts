@@ -1,4 +1,4 @@
 declare const classNames: {
-  readonly querySelect: "querySelect";
+  readonly select: "select";
 };
 export = classNames;

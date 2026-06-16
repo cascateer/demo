@@ -7,34 +7,37 @@ import { QuerySelectProps } from "./types";
 
 export function QuerySelect<T>(props: QuerySelectProps<T>) {
   return createStandaloneComponent("query-select")
-    .withStyles(import("./styles.module.scss"))
-    .withTemplate<QuerySelectProps<T>>((cn) => (props) => {
-      const input = createElement("input", {
-        className: cn.querySelectInput,
-        name: props.name,
-        type: "text",
-      });
+    .withStyles(import("../styles.module.scss"), import("./styles.module.scss"))
+    .withTemplate<QuerySelectProps<T>>(
+      (globalClassNames, classNames) => (props) => {
+        const input = createElement("input", {
+          className: globalClassNames.input,
+          name: props.name,
+          type: "text",
+        });
 
-      const options = fromEvent(input, "input").pipe(
-        flatMap((event) => {
-          const { currentTarget } = event;
+        // @ts-ignore
+        const options = fromEvent(input, "input").pipe(
+          flatMap((event) => {
+            const { currentTarget } = event;
 
-          if (currentTarget instanceof HTMLInputElement) {
-            return currentTarget.value;
-          }
+            if (currentTarget instanceof HTMLInputElement) {
+              return currentTarget.value;
+            }
 
-          return [];
-        }),
-        debounceTime(500),
-        switchMap((input) => asObservable(props.query(input))),
-      );
+            return [];
+          }),
+          debounceTime(500),
+          switchMap((input) => asObservable(props.query(input))),
+        );
 
-      return (
-        <div className={cn.querySelect}>
-          {input}
-          {/* @ts-expect-error */}
-          <Select options={options} {...props} />
-        </div>
-      );
-    })(props);
+        return (
+          <div className={classNames.querySelect}>
+            {input}
+            {/* @ts-ignore */}
+            <Select options={options} {...props} />
+          </div>
+        );
+      },
+    )(props);
 }
