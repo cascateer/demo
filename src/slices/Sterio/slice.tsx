@@ -1,19 +1,27 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
-import { DefaultApi, YtMusicSearchAlbums200ResponseInner } from "@sterio/api";
+import {
+  DefaultApi,
+  YoutubeMusicSearchAlbums200ResponseInner,
+} from "@sterio/api";
 import { constant } from "lodash";
 import { from } from "rxjs";
 import { ImportComponent } from "./Import/component";
 
 export const sterioSlice = createSlice()
-  .withData<{ ytMusicAlbumId?: string }>({})
+  .withData<{
+    youtubeMusicAlbumId?: string;
+    youtubePlaylistId?: string;
+  }>({})
   .withStore(({ StoreProvider }) =>
     new StoreProvider()
       .provideSignals(({ signal }) => ({
-        ytMusicAlbumId: signal(({ data }) => data.property("ytMusicAlbumId")),
+        youtubeMusicAlbumId: signal(({ data }) =>
+          data.property("youtubeMusicAlbumId"),
+        ),
       }))
       .provideActions(({ action }) => ({
-        updateYtMusicAlbumId: action<string>(({ ytMusicAlbumId }) =>
-          ytMusicAlbumId.update(constant),
+        updateYoutubeMusicAlbumId: action<string>(({ youtubeMusicAlbumId }) =>
+          youtubeMusicAlbumId.update(constant),
         ),
       }))
       .complete(),
@@ -21,11 +29,11 @@ export const sterioSlice = createSlice()
   .withApi(
     new ApiProvider(new DefaultApi())
       .provideEffects(({ effect }) => ({
-        ytMusicSearchAlbums: effect<
+        youtubeMusicSearchAlbums: effect<
           string,
-          YtMusicSearchAlbums200ResponseInner[]
+          YoutubeMusicSearchAlbums200ResponseInner[]
         >((api) => ({
-          predicate: (query) => from(api.ytMusicSearchAlbums(query)),
+          predicate: (query) => from(api.youtubeMusicSearchAlbums(query)),
         })),
       }))
       .complete(),
@@ -37,9 +45,10 @@ export const sterioSlice = createSlice()
         Import: component(
           ({ store, api }) =>
             new ImportComponent({
-              ytMusicAlbumId: store.effects.ytMusicAlbumId,
-              updateYtMusicAlbumId: store.actions.updateYtMusicAlbumId,
-              ytMusicSearchAlbums: api.effects.ytMusicSearchAlbums,
+              youtubeMusicAlbumId: store.effects.youtubeMusicAlbumId,
+              updateYoutubeMusicAlbumId:
+                store.actions.updateYoutubeMusicAlbumId,
+              youtubeMusicSearchAlbums: api.effects.youtubeMusicSearchAlbums,
             }),
         ),
       }))

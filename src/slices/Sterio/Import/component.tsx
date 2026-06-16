@@ -5,30 +5,40 @@ import {
   StoreEffect,
 } from "@cascateer/core";
 import { property } from "@cascateer/lib";
-import { YtMusicSearchAlbums200ResponseInner } from "@sterio/api";
+import { YoutubeMusicSearchAlbums200ResponseInner } from "@sterio/api";
 import { QuerySelect } from "../../../compontents/QuerySelect/component";
 
 export const ImportComponent = createComponent("import")
   .withStyles(import("./styles.module.scss"), import("./styles.scss?inline"))
   .withTemplate<
     {
-      ytMusicAlbumId: StoreEffect<string | undefined>;
-      updateYtMusicAlbumId: Action<string, void>;
-      ytMusicSearchAlbums: ApiEffect<
+      youtubeMusicAlbumId: StoreEffect<string | undefined>;
+      updateYoutubeMusicAlbumId: Action<string, void>;
+      youtubeMusicSearchAlbums: ApiEffect<
         string,
-        YtMusicSearchAlbums200ResponseInner[]
+        YoutubeMusicSearchAlbums200ResponseInner[]
       >;
     },
     {}
   >((ctx, classNames) => () => {
     return (
-      <QuerySelect
-        query={ctx.ytMusicSearchAlbums}
-        value={ctx.ytMusicAlbumId()}
-        name="yt-music-search-albums"
-        enumerate={property("albumId")}
-        text={property("text")}
-        onChange={({ albumId }) => ctx.updateYtMusicAlbumId(albumId)}
-      />
+      <div>
+        <QuerySelect
+          query={ctx.youtubeMusicSearchAlbums}
+          value={ctx.youtubeMusicAlbumId()}
+          name="youtube-music-search-albums"
+          enumerate={property("albumId")}
+          text={property("text")}
+          onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
+        />
+        <QuerySelect
+          query={ctx.youtubeMusicSearchAlbums}
+          value={ctx.youtubeMusicAlbumId()}
+          name="youtube-music-search-albums"
+          enumerate={property("albumId")}
+          text={property("text")}
+          onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
+        />
+      </div>
     );
   });
