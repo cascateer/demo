@@ -1,7 +1,3 @@
-.select {
-    text-indent: -3px;
-
-    option:disabled {
-        display: none;
-    }
+.select option:disabled {
+    display: none;
 }

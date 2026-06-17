@@ -1,6 +1,6 @@
 import { createStandaloneComponent } from "@cascateer/core";
 import { noop, over, thru } from "lodash";
-import { BehaviorSubject, debounceTime, switchMap } from "rxjs";
+import { BehaviorSubject, switchMap } from "rxjs";
 import { Input } from "../Input/component";
 import { Select } from "../Select/component";
 import { QuerySelectProps } from "./types";
@@ -27,14 +27,7 @@ export function QuerySelect<T>(props: QuerySelectProps<T>) {
                 onChange={over(props.onQueryChange ?? noop, updateQuery)}
                 onInput={over(props.onQueryInput ?? noop, updateQuery)}
               />
-              {/* @ts-ignore */}
-              <Select
-                options={query.pipe(
-                  debounceTime(500),
-                  switchMap((query) => options(query ?? "")),
-                )}
-                {...props}
-              />
+              <Select options={query.pipe(switchMap(options))} {...props} />
             </div>
           );
         },

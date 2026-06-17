@@ -19,7 +19,7 @@ export const ImportComponent = createComponent("import")
       youtubeMusicAlbumId: StoreEffect<string | undefined>;
       updateYoutubeMusicAlbumId: Action<string, void>;
       youtubeMusicSearchAlbums: ApiEffect<
-        string,
+        string | undefined,
         YoutubeMusicSearchAlbums200ResponseInner[]
       >;
       youtubePlaylistId: StoreEffect<string | undefined>;

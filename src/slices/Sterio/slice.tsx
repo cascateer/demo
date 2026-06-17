@@ -48,7 +48,7 @@ export const sterioSlice = createSlice()
     new ApiProvider(new DefaultApi())
       .provideEffects(({ effect }) => ({
         youtubeMusicSearchAlbums: effect<
-          string,
+          string | undefined,
           YoutubeMusicSearchAlbums200ResponseInner[]
         >((api) => ({
           predicate: (q) => api.youtubeMusicSearchAlbums({ q }),

@@ -1,7 +1,7 @@
 import { createStandaloneComponent } from "@cascateer/core";
 import { createElement } from "@cascateer/lib";
 import cn from "classnames";
-import { merge, withLatestFrom } from "rxjs";
+import { debounceTime, merge, withLatestFrom } from "rxjs";
 import { eventListener } from "../../lib";
 import { InputProps } from "./types";
 
@@ -18,7 +18,10 @@ export function Input(props: InputProps) {
             type: "text",
           });
 
-          merge(eventListener(input, "change"), eventListener(input, "input"))
+          merge(
+            eventListener(input, "change"),
+            eventListener(input, "input").pipe(debounceTime(500)),
+          )
             .pipe(withLatestFrom(value))
             .subscribe({
               next: ([{ type, target }, sourceValue]) => {
