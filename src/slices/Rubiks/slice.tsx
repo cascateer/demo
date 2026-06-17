@@ -3,6 +3,7 @@ import {
   createSlice,
   defineCustomProperties,
 } from "@cascateer/core";
+import { property } from "@cascateer/lib";
 import axios from "axios";
 import { combineLatest, delay, from, map, tap } from "rxjs";
 import { CubeComponent } from "./Cube/component";
@@ -77,6 +78,7 @@ export const rubiksSlice = createSlice()
         baseMoves: effect<void, Cube.BaseMoves>((axios) => ({
           predicate: () =>
             from(axios.get(`${API_BASE_URL}/rubiks/baseMoves`)).pipe(
+              map(property("data")),
               delay(1e3),
             ),
           tags: "baseMoves",
@@ -84,34 +86,41 @@ export const rubiksSlice = createSlice()
         customMoves: effect<void, Cube.Move[]>((axios) => ({
           predicate: () =>
             from(axios.get(`${API_BASE_URL}/rubiks/customMoves`)).pipe(
+              map(property("data")),
               delay(0e3),
             ),
           tags: "customMoves",
         })),
       }))
       .provideActions(({ action }) => ({
-        spotifyAuth: action<void, void>((axios) => ({
+        spotifyAuth: action<void, string>((axios) => ({
           predicate: () =>
             from(
-              axios.get(`${API_BASE_URL}/spotify/auth`, {
-                withCredentials: true,
-              }),
-            ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
+              axios
+                .get(`${API_BASE_URL}/spotify/auth`, {
+                  withCredentials: true,
+                })
+                .then(property("data")),
+            ).pipe(tap((url) => window.open(url, "_blank")?.focus())),
         })),
-        youtubeAuth: action<void, void>((axios) => ({
+        youtubeAuth: action<void, string>((axios) => ({
           predicate: () =>
             from(
-              axios.get(`${API_BASE_URL}/youtube/auth`, {
-                withCredentials: true,
-              }),
-            ).pipe(tap(({ data }) => window.open(data, "_blank")?.focus())),
+              axios
+                .get(`${API_BASE_URL}/youtube/auth`, {
+                  withCredentials: true,
+                })
+                .then(property("data")),
+            ).pipe(tap((url) => window.open(url, "_blank")?.focus())),
         })),
         youtubeTest: action<void, void>((axios) => ({
           predicate: () =>
             from(
-              axios.get(
-                `${API_BASE_URL}/youtube/query?q=intro ${encodeURIComponent("Rey&Kjavik")}&playlistId=UCuGdq56L4viJ_U7UiNnhb2A`,
-              ),
+              axios
+                .get(
+                  `${API_BASE_URL}/youtube/query?q=intro ${encodeURIComponent("Rey&Kjavik")}&playlistId=UCuGdq56L4viJ_U7UiNnhb2A`,
+                )
+                .then(property("data")),
             ),
         })),
       }))

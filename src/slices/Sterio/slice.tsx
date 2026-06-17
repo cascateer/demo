@@ -1,11 +1,11 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
+import { DefaultApi } from "@sterio/apis";
 import {
-  DefaultApi,
   YoutubeMusicSearchAlbums200ResponseInner,
   YoutubePlaylist,
-} from "@sterio/api";
+} from "@sterio/models";
 import { constant, uniq } from "lodash";
-import { from, switchMap } from "rxjs";
+import { switchMap } from "rxjs";
 import { ImportComponent } from "./Import/component";
 
 export const sterioSlice = createSlice()
@@ -56,10 +56,10 @@ export const sterioSlice = createSlice()
           string,
           YoutubeMusicSearchAlbums200ResponseInner[]
         >((api) => ({
-          predicate: (query) => from(api.youtubeMusicSearchAlbums(query)),
+          predicate: (q) => api.youtubeMusicSearchAlbums({ q }),
         })),
         youtubePlaylists: effect<string, YoutubePlaylist[]>((api) => ({
-          predicate: (ids) => from(api.youtubePlaylists(ids)),
+          predicate: (ids) => api.youtubePlaylists({ ids }),
         })),
       }))
       .complete(),

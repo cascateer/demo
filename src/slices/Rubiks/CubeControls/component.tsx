@@ -9,8 +9,8 @@ export const CubeControlsComponent = createComponent("cubeControls")
       baseMoves: TerminalEffect<void, Cube.BaseMoves>;
       customMoves: TerminalEffect<void, Cube.Move[]>;
       queueAction: Action<Cube.Action, void>;
-      spotifyAuth: Action<void, void>;
-      youtubeAuth: Action<void, void>;
+      spotifyAuth: Action<void, string>;
+      youtubeAuth: Action<void, string>;
       youtubeTest: Action<void, void>;
     },
     {}
