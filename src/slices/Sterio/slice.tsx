@@ -4,21 +4,17 @@ import {
   YoutubeMusicSearchAlbums200ResponseInner,
   YoutubePlaylist,
 } from "@sterio/models";
-import { constant, uniq } from "lodash";
-import { switchMap } from "rxjs";
+import { constant, sortBy, sortedUniq, uniq } from "lodash";
+import { map, switchMap } from "rxjs";
 import { ImportComponent } from "./Import/component";
 
 export const sterioSlice = createSlice()
   .withData<{
     youtubeMusicAlbumId?: string;
     youtubePlaylistId?: string;
-    youtubePlaylistIds: string[];
+    youtubePlaylistQueries: string[];
   }>({
-    youtubePlaylistId: "PLEouLkiLHdSDWX0mmkQ07iEcF6AyYFyNN",
-    youtubePlaylistIds: [
-      "PLkROH3Eqs0T8GFsJ0ACddo8hc1M4_GFFu",
-      "PLEouLkiLHdSDWX0mmkQ07iEcF6AyYFyNN",
-    ],
+    youtubePlaylistQueries: [],
   })
   .withStore(({ StoreProvider }) =>
     new StoreProvider()
@@ -29,8 +25,8 @@ export const sterioSlice = createSlice()
         youtubePlaylistId: signal(({ data }) =>
           data.property("youtubePlaylistId"),
         ),
-        youtubePlaylistIds: signal(({ data }) =>
-          data.property("youtubePlaylistIds"),
+        youtubePlaylistQueries: signal(({ data }) =>
+          data.property("youtubePlaylistQueries"),
         ),
       }))
       .provideActions(({ action }) => ({
@@ -40,10 +36,9 @@ export const sterioSlice = createSlice()
         updateYoutubePlaylistId: action<string>(({ youtubePlaylistId }) =>
           youtubePlaylistId.update(constant),
         ),
-        addYoutubePlaylistId: action<string>(({ youtubePlaylistIds }) =>
-          youtubePlaylistIds.update(
-            (playlistId) => (youtubePlaylistIds) =>
-              uniq(youtubePlaylistIds.concat(playlistId)),
+        addYoutubePlaylistQuery: action<string>(({ youtubePlaylistQueries }) =>
+          youtubePlaylistQueries.update(
+            (query) => (queries) => uniq(queries.concat(query)),
           ),
         ),
       }))
@@ -58,8 +53,11 @@ export const sterioSlice = createSlice()
         >((api) => ({
           predicate: (q) => api.youtubeMusicSearchAlbums({ q }),
         })),
-        youtubePlaylists: effect<string, YoutubePlaylist[]>((api) => ({
-          predicate: (ids) => api.youtubePlaylists({ ids }),
+        youtubePlaylists: effect<string[], YoutubePlaylist[]>((api) => ({
+          predicate: (ids: string[]) =>
+            ids.length > 0
+              ? api.youtubePlaylists({ ids: `${sortedUniq(sortBy(ids))}` })
+              : [],
         })),
       }))
       .complete(),
@@ -67,16 +65,39 @@ export const sterioSlice = createSlice()
   .withTerminal(({ TerminalProvider }) =>
     new TerminalProvider()
       .provideEffects(({ effect }) => ({
-        youtubePlaylists: effect<void, YoutubePlaylist[]>(
-          ({ store, api }) =>
+        youtubePlaylistIds: effect<void, string[]>(
+          ({ store }) =>
             () =>
-              store.effects
-                .youtubePlaylistIds()
-                .pipe(
-                  switchMap((ids) =>
-                    api.effects.youtubePlaylists(ids.join(",")),
-                  ),
+              store.effects.youtubePlaylistQueries().pipe(
+                map((queries) =>
+                  queries
+                    .map((query) => query.trim())
+                    .flatMap((query) => {
+                      const id = (() => {
+                        try {
+                          return new URL(query).searchParams.get("list");
+                        } catch {
+                          return query;
+                        }
+                      })();
+
+                      if (id != null && /^[\w-]+$/.test(id)) {
+                        return id;
+                      }
+
+                      return [];
+                    }),
                 ),
+              ),
+        ),
+      }))
+      .provideEffects(({ effect }) => ({
+        youtubePlaylists: effect<void, YoutubePlaylist[]>(
+          ({ api, terminal }) =>
+            () =>
+              terminal.effects
+                .youtubePlaylistIds()
+                .pipe(switchMap(api.effects.youtubePlaylists)),
         ),
       }))
       .complete(),
@@ -93,8 +114,8 @@ export const sterioSlice = createSlice()
               youtubeMusicSearchAlbums: api.effects.youtubeMusicSearchAlbums,
               youtubePlaylistId: store.effects.youtubePlaylistId,
               updateYoutubePlaylistId: store.actions.updateYoutubePlaylistId,
-              youtubePlaylistIds: store.effects.youtubePlaylistIds,
-              addYoutubePlaylistId: store.actions.addYoutubePlaylistId,
+              youtubePlaylistQueries: store.effects.youtubePlaylistQueries,
+              addYoutubePlaylistQuery: store.actions.addYoutubePlaylistQuery,
               youtubePlaylists: terminal.effects.youtubePlaylists,
             }),
         ),

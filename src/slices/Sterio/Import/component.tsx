@@ -9,7 +9,7 @@ import { property } from "@cascateer/lib";
 import {
   YoutubeMusicSearchAlbums200ResponseInner,
   YoutubePlaylist,
-} from "@sterio/api";
+} from "@sterio/models";
 import { QuerySelect } from "../../../compontents/QuerySelect/component";
 
 export const ImportComponent = createComponent("import")
@@ -24,8 +24,8 @@ export const ImportComponent = createComponent("import")
       >;
       youtubePlaylistId: StoreEffect<string | undefined>;
       updateYoutubePlaylistId: Action<string, void>;
-      youtubePlaylistIds: StoreEffect<string[]>;
-      addYoutubePlaylistId: Action<string, void>;
+      youtubePlaylistQueries: StoreEffect<string[]>;
+      addYoutubePlaylistQuery: Action<string, void>;
       youtubePlaylists: TerminalEffect<void, YoutubePlaylist[]>;
     },
     {}
@@ -41,8 +41,7 @@ export const ImportComponent = createComponent("import")
           onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
         />
         <QuerySelect
-          query={ctx.youtubePlaylistId()}
-          onQueryChange={ctx.updateYoutubePlaylistId}
+          onQueryChange={ctx.addYoutubePlaylistQuery}
           options={() => ctx.youtubePlaylists()}
           selectedValue={ctx.youtubePlaylistId()}
           name="youtube-playlists"
