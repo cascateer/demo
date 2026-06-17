@@ -11,11 +11,11 @@ export function QuerySelect<T>(props: QuerySelectProps<T>) {
     .withTemplate<QuerySelectProps<T>>(
       (globalClassNames, classNames) =>
         ({ options, ...props }) => {
-          const { query, onQueryChange } = thru(
+          const { query, updateQuery } = thru(
             new BehaviorSubject(""),
             (query) => ({
               query: props.query ?? query,
-              onQueryChange: (value: string) => query.next(value),
+              updateQuery: (value: string) => query.next(value),
             }),
           );
 
@@ -24,7 +24,8 @@ export function QuerySelect<T>(props: QuerySelectProps<T>) {
               <Input
                 name={props.name}
                 value={query}
-                onChange={over(props.onQueryChange ?? noop, onQueryChange)}
+                onChange={over(props.onQueryChange ?? noop, updateQuery)}
+                onInput={over(props.onQueryInput ?? noop, updateQuery)}
               />
               {/* @ts-ignore */}
               <Select

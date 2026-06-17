@@ -1,8 +1,8 @@
 import { createStandaloneComponent } from "@cascateer/core";
 import { createElement } from "@cascateer/lib";
-import { flatMap } from "@cascateer/lib/operators";
 import cn from "classnames";
-import { fromEvent, withLatestFrom } from "rxjs";
+import { merge, withLatestFrom } from "rxjs";
+import { eventListener } from "../../lib";
 import { InputProps } from "./types";
 
 export function Input(props: InputProps) {
@@ -18,26 +18,26 @@ export function Input(props: InputProps) {
             type: "text",
           });
 
-          fromEvent<Event>(input, "input")
-            .pipe(
-              flatMap((event) => {
-                const { currentTarget } = event;
-
-                if (currentTarget instanceof HTMLInputElement) {
-                  return currentTarget.value;
-                }
-
-                return [];
-              }),
-              withLatestFrom(value),
-            )
+          merge(eventListener(input, "change"), eventListener(input, "input"))
+            .pipe(withLatestFrom(value))
             .subscribe({
-              next: ([sourceValue, targetValue]) => {
-                if (sourceValue !== targetValue) {
-                  input.value = targetValue ?? "";
+              next: ([{ type, target }, sourceValue]) => {
+                const targetValue = target.value;
+
+                if (targetValue !== sourceValue) {
+                  target.value = sourceValue ?? "";
                 }
 
-                props.onChange?.call(null, sourceValue);
+                switch (type) {
+                  case "change":
+                    props.onChange?.call(null, targetValue);
+
+                    break;
+                  case "input":
+                    props.onInput?.call(null, targetValue);
+
+                    break;
+                }
               },
             });
 

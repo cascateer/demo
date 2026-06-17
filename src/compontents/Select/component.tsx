@@ -6,10 +6,10 @@ import {
   nonNullable,
   nthArg,
 } from "@cascateer/lib";
-import { flatMap } from "@cascateer/lib/operators";
 import cn from "classnames";
 import { noop } from "lodash";
-import { combineLatest, fromEvent, map, startWith, withLatestFrom } from "rxjs";
+import { combineLatest, map, startWith, withLatestFrom } from "rxjs";
+import { eventListener } from "../../lib";
 import { SelectProps } from "./types";
 
 export function Select<T>(props: SelectProps<T>) {
@@ -34,16 +34,8 @@ export function Select<T>(props: SelectProps<T>) {
             name: props.name,
           });
 
-          const selectedValue = fromEvent<Event>(select, "input").pipe(
-            flatMap((event) => {
-              const { currentTarget } = event;
-
-              if (currentTarget instanceof HTMLSelectElement) {
-                return currentTarget.value;
-              }
-
-              return [];
-            }),
+          const selectedValue = eventListener(select, "change").pipe(
+            map(({ target }) => target.value),
           );
 
           selectedValue
