@@ -2,7 +2,7 @@ import { createStandaloneComponent } from "@cascateer/core";
 import { asObservable, createElement } from "@cascateer/lib";
 import { flatMap } from "@cascateer/lib/operators";
 import cn from "classnames";
-import { fromEvent } from "rxjs";
+import { fromEvent, withLatestFrom } from "rxjs";
 import { InputProps } from "./types";
 
 export function Input(props: InputProps) {
@@ -16,6 +16,8 @@ export function Input(props: InputProps) {
         type: "text",
       });
 
+      const value = asObservable(props.value);
+
       fromEvent<Event>(input, "input")
         .pipe(
           flatMap((event) => {
@@ -27,10 +29,19 @@ export function Input(props: InputProps) {
 
             return [];
           }),
+          withLatestFrom(value),
         )
-        .subscribe(props.onChange);
+        .subscribe({
+          next: ([sourceValue, targetValue]) => {
+            props.onChange?.call(null, sourceValue);
 
-      asObservable(props.value).subscribe({
+            if (sourceValue !== targetValue) {
+              input.value = targetValue ?? "";
+            }
+          },
+        });
+
+      value.subscribe({
         next: (value) => (input.value = value ?? ""),
       });
 
