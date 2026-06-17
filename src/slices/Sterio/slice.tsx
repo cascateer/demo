@@ -1,7 +1,7 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
 import { DefaultApi } from "@sterio/apis";
 import {
-  YoutubeMusicSearchAlbums200ResponseInner,
+  YoutubeMusicAlbums200ResponseInner,
   YoutubePlaylist,
 } from "@sterio/models";
 import { constant, sortBy, sortedUniq, uniq } from "lodash";
@@ -47,11 +47,11 @@ export const sterioSlice = createSlice()
   .withApi(
     new ApiProvider(new DefaultApi())
       .provideEffects(({ effect }) => ({
-        youtubeMusicSearchAlbums: effect<
+        youtubeMusicAlbums: effect<
           string | undefined,
-          YoutubeMusicSearchAlbums200ResponseInner[]
+          YoutubeMusicAlbums200ResponseInner[]
         >((api) => ({
-          predicate: (q) => api.youtubeMusicSearchAlbums({ q }),
+          predicate: (q) => api.youtubeMusicAlbums({ q }),
         })),
         youtubePlaylists: effect<string[], YoutubePlaylist[]>((api) => ({
           predicate: (ids: string[]) =>
@@ -111,7 +111,7 @@ export const sterioSlice = createSlice()
               youtubeMusicAlbumId: store.effects.youtubeMusicAlbumId,
               updateYoutubeMusicAlbumId:
                 store.actions.updateYoutubeMusicAlbumId,
-              youtubeMusicSearchAlbums: api.effects.youtubeMusicSearchAlbums,
+              youtubeMusicAlbums: api.effects.youtubeMusicAlbums,
               youtubePlaylistId: store.effects.youtubePlaylistId,
               updateYoutubePlaylistId: store.actions.updateYoutubePlaylistId,
               youtubePlaylistQueries: store.effects.youtubePlaylistQueries,

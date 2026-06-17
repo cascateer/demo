@@ -7,7 +7,7 @@ import {
 } from "@cascateer/core";
 import { property } from "@cascateer/lib";
 import {
-  YoutubeMusicSearchAlbums200ResponseInner,
+  YoutubeMusicAlbums200ResponseInner,
   YoutubePlaylist,
 } from "@sterio/models";
 import { QuerySelect } from "../../../compontents/QuerySelect/component";
@@ -18,9 +18,9 @@ export const ImportComponent = createComponent("import")
     {
       youtubeMusicAlbumId: StoreEffect<string | undefined>;
       updateYoutubeMusicAlbumId: Action<string, void>;
-      youtubeMusicSearchAlbums: ApiEffect<
+      youtubeMusicAlbums: ApiEffect<
         string | undefined,
-        YoutubeMusicSearchAlbums200ResponseInner[]
+        YoutubeMusicAlbums200ResponseInner[]
       >;
       youtubePlaylistId: StoreEffect<string | undefined>;
       updateYoutubePlaylistId: Action<string, void>;
@@ -31,24 +31,28 @@ export const ImportComponent = createComponent("import")
     {}
   >((ctx, classNames) => () => {
     return (
-      <div>
-        <QuerySelect
-          options={ctx.youtubeMusicSearchAlbums}
-          selectedValue={ctx.youtubeMusicAlbumId()}
-          name="youtube-music-search-albums"
-          enumerate={property("albumId")}
-          text={property("text")}
-          onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
-        />
-        <QuerySelect
-          onQueryChange={ctx.addYoutubePlaylistQuery}
-          options={() => ctx.youtubePlaylists()}
-          selectedValue={ctx.youtubePlaylistId()}
-          name="youtube-playlists"
-          enumerate={property("id")}
-          text={(playlist) => playlist.title ?? playlist.id}
-          onChange={({ id }) => ctx.updateYoutubePlaylistId(id)}
-        />
-      </div>
+      <>
+        <div>
+          <QuerySelect
+            options={ctx.youtubeMusicAlbums}
+            selectedValue={ctx.youtubeMusicAlbumId()}
+            name="youtube-music-albums"
+            enumerate={property("albumId")}
+            text={property("text")}
+            onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
+          />
+        </div>
+        <div>
+          <QuerySelect
+            onQueryChange={ctx.addYoutubePlaylistQuery}
+            options={() => ctx.youtubePlaylists()}
+            selectedValue={ctx.youtubePlaylistId()}
+            name="youtube-playlists"
+            enumerate={property("id")}
+            text={(playlist) => playlist.title ?? playlist.id}
+            onChange={({ id }) => ctx.updateYoutubePlaylistId(id)}
+          />
+        </div>
+      </>
     );
   });
