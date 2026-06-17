@@ -1,9 +1,9 @@
-import { EnumerableItem, Enumerator, MaybeObservable } from "@cascateer/lib";
-import { UnaryFunction } from "rxjs";
+import { EnumerableItem, Enumerator } from "@cascateer/lib";
+import { Observable, UnaryFunction } from "rxjs";
 
 export type SelectProps<T> = {
-  options: MaybeObservable<T>;
-  id: MaybeObservable<PropertyKey | undefined>;
+  options: Observable<T>;
+  selectedValue: Observable<string | undefined>;
   name: string;
   enumerate?: Enumerator<T>;
   text?: Enumerator<T>;

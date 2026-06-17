@@ -3,9 +3,13 @@ import {
   ApiEffect,
   createComponent,
   StoreEffect,
+  TerminalEffect,
 } from "@cascateer/core";
 import { property } from "@cascateer/lib";
-import { YoutubeMusicSearchAlbums200ResponseInner } from "@sterio/api";
+import {
+  YoutubeMusicSearchAlbums200ResponseInner,
+  YoutubePlaylist,
+} from "@sterio/api";
 import { QuerySelect } from "../../../compontents/QuerySelect/component";
 
 export const ImportComponent = createComponent("import")
@@ -18,26 +22,33 @@ export const ImportComponent = createComponent("import")
         string,
         YoutubeMusicSearchAlbums200ResponseInner[]
       >;
+      youtubePlaylistId: StoreEffect<string | undefined>;
+      updateYoutubePlaylistId: Action<string, void>;
+      youtubePlaylistIds: StoreEffect<string[]>;
+      addYoutubePlaylistId: Action<string, void>;
+      youtubePlaylists: TerminalEffect<void, YoutubePlaylist[]>;
     },
     {}
   >((ctx, classNames) => () => {
     return (
       <div>
         <QuerySelect
-          query={ctx.youtubeMusicSearchAlbums}
-          id={ctx.youtubeMusicAlbumId()}
+          options={ctx.youtubeMusicSearchAlbums}
+          selectedValue={ctx.youtubeMusicAlbumId()}
           name="youtube-music-search-albums"
           enumerate={property("albumId")}
           text={property("text")}
           onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
         />
         <QuerySelect
-          query={ctx.youtubeMusicSearchAlbums}
-          id={ctx.youtubeMusicAlbumId()}
-          name="youtube-music-search-albums"
-          enumerate={property("albumId")}
-          text={property("text")}
-          onChange={({ albumId }) => ctx.updateYoutubeMusicAlbumId(albumId)}
+          query={ctx.youtubePlaylistId()}
+          onQueryChange={ctx.updateYoutubePlaylistId}
+          options={() => ctx.youtubePlaylists()}
+          selectedValue={ctx.youtubePlaylistId()}
+          name="youtube-playlists"
+          enumerate={property("id")}
+          text={(playlist) => playlist.title ?? playlist.id}
+          onChange={({ id }) => ctx.updateYoutubePlaylistId(id)}
         />
       </div>
     );

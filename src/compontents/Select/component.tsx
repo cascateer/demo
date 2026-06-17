@@ -1,7 +1,6 @@
 import { createStandaloneComponent } from "@cascateer/core";
 import {
   asEnumerable,
-  asObservable,
   createElement,
   EnumerableItem,
   nonNullable,
@@ -10,14 +9,7 @@ import {
 import { flatMap } from "@cascateer/lib/operators";
 import cn from "classnames";
 import { noop } from "lodash";
-import {
-  combineLatest,
-  fromEvent,
-  map,
-  shareReplay,
-  startWith,
-  withLatestFrom,
-} from "rxjs";
+import { combineLatest, fromEvent, map, startWith, withLatestFrom } from "rxjs";
 import { SelectProps } from "./types";
 
 export function Select<T>(props: SelectProps<T>) {
@@ -32,44 +24,47 @@ export function Select<T>(props: SelectProps<T>) {
           onChange = noop,
           ...props
         }) => {
+          const options = props.options.pipe(
+            map(asEnumerable),
+            startWith(new Array<EnumerableItem<T>>()),
+          );
+
           const select = createElement("select", {
             className: cn(globalClassNames.input, classNames.select),
             name: props.name,
           });
 
-          const options = asObservable(props.options).pipe(
-            map(asEnumerable),
-            startWith(new Array<EnumerableItem<T>>()),
+          const selectedValue = fromEvent<Event>(select, "input").pipe(
+            flatMap((event) => {
+              const { currentTarget } = event;
+
+              if (currentTarget instanceof HTMLSelectElement) {
+                return currentTarget.value;
+              }
+
+              return [];
+            }),
           );
 
-          fromEvent<Event>(select, "change")
+          selectedValue
             .pipe(
-              flatMap((event) => {
-                const { currentTarget } = event;
-
-                if (currentTarget instanceof HTMLSelectElement) {
-                  return currentTarget.value;
-                }
-
-                return [];
-              }),
-              shareReplay(1),
               withLatestFrom(options),
-              map(([selectedKey, options]) =>
+              map(([selectedValue, options]) =>
                 nonNullable(
                   options.find(
-                    (option, index) => enumerate(option, index) === selectedKey,
+                    (option, index) =>
+                      enumerate(option, index) === selectedValue,
                   ),
                 ),
               ),
             )
             .subscribe(onChange);
 
-          combineLatest([options, asObservable(props.id)]).subscribe({
-            next: ([options, id]) => {
+          combineLatest([props.selectedValue, options]).subscribe({
+            next: ([selectedValue, options]) => {
               select.replaceChildren(
                 createElement("option", {
-                  innerText: id?.toString() ?? "",
+                  innerText: selectedValue?.toString() ?? "",
                   disabled: true,
                 }),
                 ...options.map((option, index) =>
@@ -81,7 +76,9 @@ export function Select<T>(props: SelectProps<T>) {
               );
 
               select.selectedIndex =
-                (id != null ? options.map(enumerate).indexOf(id) : -1) + 1;
+                (selectedValue != null
+                  ? options.map(enumerate).indexOf(selectedValue)
+                  : -1) + 1;
             },
           });
 

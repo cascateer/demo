@@ -1,7 +1,7 @@
 import { createStandaloneComponent } from "@cascateer/core";
-import { asObservable, createElement } from "@cascateer/lib";
-import { flatMap } from "@cascateer/lib/operators";
-import { debounceTime, fromEvent, switchMap } from "rxjs";
+import { noop, over, thru } from "lodash";
+import { BehaviorSubject, debounceTime, switchMap } from "rxjs";
+import { Input } from "../Input/component";
 import { Select } from "../Select/component";
 import { QuerySelectProps } from "./types";
 
@@ -9,35 +9,33 @@ export function QuerySelect<T>(props: QuerySelectProps<T>) {
   return createStandaloneComponent("query-select")
     .withStyles(import("../styles.module.scss"), import("./styles.module.scss"))
     .withTemplate<QuerySelectProps<T>>(
-      (globalClassNames, classNames) => (props) => {
-        const input = createElement("input", {
-          className: globalClassNames.input,
-          name: props.name,
-          type: "text",
-        });
+      (globalClassNames, classNames) =>
+        ({ options, ...props }) => {
+          const { query, onQueryChange } = thru(
+            new BehaviorSubject(""),
+            (query) => ({
+              query: props.query ?? query,
+              onQueryChange: (value: string) => query.next(value),
+            }),
+          );
 
-        // @ts-ignore
-        const options = fromEvent(input, "input").pipe(
-          flatMap((event) => {
-            const { currentTarget } = event;
-
-            if (currentTarget instanceof HTMLInputElement) {
-              return currentTarget.value;
-            }
-
-            return [];
-          }),
-          debounceTime(500),
-          switchMap((input) => asObservable(props.query(input))),
-        );
-
-        return (
-          <div className={classNames.querySelect}>
-            {input}
-            {/* @ts-ignore */}
-            <Select options={options} {...props} />
-          </div>
-        );
-      },
+          return (
+            <div className={classNames.querySelect}>
+              <Input
+                name={props.name}
+                value={query}
+                onChange={over(props.onQueryChange ?? noop, onQueryChange)}
+              />
+              {/* @ts-ignore */}
+              <Select
+                options={query.pipe(
+                  debounceTime(500),
+                  switchMap((query) => options(query ?? "")),
+                )}
+                {...props}
+              />
+            </div>
+          );
+        },
     )(props);
 }
