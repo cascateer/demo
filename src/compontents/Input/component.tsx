@@ -1,8 +1,8 @@
 import { createStandaloneComponent } from "@cascateer/core";
 import { createElement } from "@cascateer/lib";
+import { eventListener } from "@cascateer/lib/observables";
 import cn from "classnames";
 import { debounceTime, merge, withLatestFrom } from "rxjs";
-import { eventListener } from "../../lib";
 import { InputProps } from "./types";
 
 export function Input(props: InputProps) {

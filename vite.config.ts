@@ -1,4 +1,3 @@
-import { readFileSync } from "fs";
 import { resolve } from "path";
 import type { UserConfig } from "vite";
 import sassDts from "vite-plugin-sass-dts";
@@ -32,9 +31,5 @@ export default {
 
   server: {
     port: 4173,
-    https: {
-      pfx: readFileSync("./ssl.pfx"),
-      passphrase: "passphrase",
-    },
   },
 } satisfies UserConfig;

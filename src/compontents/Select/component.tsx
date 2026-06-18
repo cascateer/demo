@@ -6,10 +6,10 @@ import {
   nonNullable,
   nthArg,
 } from "@cascateer/lib";
+import { eventListener } from "@cascateer/lib/observables";
 import cn from "classnames";
 import { noop } from "lodash";
 import { combineLatest, map, startWith, withLatestFrom } from "rxjs";
-import { eventListener } from "../../lib";
 import { SelectProps } from "./types";
 
 export function Select<T>(props: SelectProps<T>) {
