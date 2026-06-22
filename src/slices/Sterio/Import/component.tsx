@@ -7,6 +7,7 @@ import {
 } from "@cascateer/core";
 import { property } from "@cascateer/lib";
 import {
+  SpotifyApiAlbumObjectSimplified,
   YoutubeMusicAlbums200ResponseInner,
   YoutubePlaylist,
 } from "@sterio/models";
@@ -19,7 +20,7 @@ export const ImportComponent = createComponent("import")
       youtubeMusicAlbumId: StoreEffect<string | undefined>;
       updateYoutubeMusicAlbumId: Action<string, void>;
       youtubeMusicAlbums: ApiEffect<
-        string | undefined,
+        string,
         YoutubeMusicAlbums200ResponseInner[]
       >;
       youtubePlaylistId: StoreEffect<string | undefined>;
@@ -27,6 +28,11 @@ export const ImportComponent = createComponent("import")
       youtubePlaylistQueries: StoreEffect<string[]>;
       addYoutubePlaylistQuery: Action<string, void>;
       youtubePlaylists: TerminalEffect<void, YoutubePlaylist[]>;
+      spotifyAlbumQuery: StoreEffect<string | undefined>;
+      updateSpotifyAlbumQuery: Action<string, void>;
+      spotifyAlbumId: StoreEffect<string | undefined>;
+      updateSpotifyAlbumId: Action<string, void>;
+      spotifyAlbums: ApiEffect<string, SpotifyApiAlbumObjectSimplified[]>;
     },
     {}
   >((ctx, classNames) => () => {
@@ -51,6 +57,20 @@ export const ImportComponent = createComponent("import")
             enumerate={property("id")}
             text={(playlist) => playlist.title ?? playlist.id}
             onChange={({ id }) => ctx.updateYoutubePlaylistId(id)}
+          />
+        </div>
+        <div>
+          <QuerySelect
+            query={ctx.spotifyAlbumQuery()}
+            onQueryInput={ctx.updateSpotifyAlbumQuery}
+            options={ctx.spotifyAlbums}
+            selectedValue={ctx.spotifyAlbumId()}
+            name="spotify-albums"
+            enumerate={property("id")}
+            text={(album) =>
+              `${album.name} - ${album.artists.map(property("name")).join(", ")} (${album.release_date.slice(0, 4)})`
+            }
+            onChange={({ id }) => ctx.updateSpotifyAlbumId(id)}
           />
         </div>
       </>

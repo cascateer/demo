@@ -1,6 +1,7 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
 import { DefaultApi } from "@sterio/apis";
 import {
+  SpotifyApiAlbumObjectSimplified,
   YoutubeMusicAlbums200ResponseInner,
   YoutubePlaylist,
 } from "@sterio/models";
@@ -13,6 +14,8 @@ export const sterioSlice = createSlice()
     youtubeMusicAlbumId?: string;
     youtubePlaylistId?: string;
     youtubePlaylistQueries: string[];
+    spotifyAlbumQuery?: string;
+    spotifyAlbumId?: string;
   }>({
     youtubePlaylistQueries: [],
   })
@@ -28,6 +31,10 @@ export const sterioSlice = createSlice()
         youtubePlaylistQueries: signal(({ data }) =>
           data.property("youtubePlaylistQueries"),
         ),
+        spotifyAlbumQuery: signal(({ data }) =>
+          data.property("spotifyAlbumQuery"),
+        ),
+        spotifyAlbumId: signal(({ data }) => data.property("spotifyAlbumId")),
       }))
       .provideActions(({ action }) => ({
         updateYoutubeMusicAlbumId: action<string>(({ youtubeMusicAlbumId }) =>
@@ -41,6 +48,12 @@ export const sterioSlice = createSlice()
             (query) => (queries) => uniq(queries.concat(query)),
           ),
         ),
+        updateSpotifyAlbumQuery: action<string>(({ spotifyAlbumQuery }) =>
+          spotifyAlbumQuery.update(constant),
+        ),
+        updateSpotifyAlbumId: action<string>(({ spotifyAlbumId }) =>
+          spotifyAlbumId.update(constant),
+        ),
       }))
       .complete(),
   )
@@ -48,17 +61,22 @@ export const sterioSlice = createSlice()
     new ApiProvider(new DefaultApi())
       .provideEffects(({ effect }) => ({
         youtubeMusicAlbums: effect<
-          string | undefined,
+          string,
           YoutubeMusicAlbums200ResponseInner[]
         >((api) => ({
           predicate: (q) => api.youtubeMusicAlbums({ q }),
         })),
         youtubePlaylists: effect<string[], YoutubePlaylist[]>((api) => ({
-          predicate: (ids: string[]) =>
+          predicate: (ids) =>
             ids.length > 0
               ? api.youtubePlaylists({ ids: `${sortedUniq(sortBy(ids))}` })
               : [],
         })),
+        spotifyAlbums: effect<string, SpotifyApiAlbumObjectSimplified[]>(
+          (api) => ({
+            predicate: (q) => api.spotifyAlbums({ q }),
+          }),
+        ),
       }))
       .complete(),
   )
@@ -117,6 +135,11 @@ export const sterioSlice = createSlice()
               youtubePlaylistQueries: store.effects.youtubePlaylistQueries,
               addYoutubePlaylistQuery: store.actions.addYoutubePlaylistQuery,
               youtubePlaylists: terminal.effects.youtubePlaylists,
+              spotifyAlbumQuery: store.effects.spotifyAlbumQuery,
+              updateSpotifyAlbumQuery: store.actions.updateSpotifyAlbumQuery,
+              spotifyAlbumId: store.effects.spotifyAlbumId,
+              updateSpotifyAlbumId: store.actions.updateSpotifyAlbumId,
+              spotifyAlbums: api.effects.spotifyAlbums,
             }),
         ),
       }))
