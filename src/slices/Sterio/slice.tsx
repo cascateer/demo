@@ -1,58 +1,83 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
-import { DefaultApi } from "@sterio/apis";
+import { flatMap } from "@cascateer/lib/observables";
+import { DefaultApi, GetAlbumResourcesMatchColumnsRequest } from "@sterio/apis";
 import {
+  GetYoutubeMusicAlbums200ResponseInner,
   SpotifyApiAlbumObjectSimplified,
-  YoutubeMusicAlbums200ResponseInner,
+  SterioAlbumResource,
+  SterioAlbumResourcesMatchColumns,
   YoutubePlaylist,
 } from "@sterio/models";
-import { constant, sortBy, sortedUniq, uniq } from "lodash";
-import { map, switchMap } from "rxjs";
+import { sortBy, sortedUniq, uniq } from "lodash";
+import { combineLatest, map, mergeAll, switchMap } from "rxjs";
 import { ImportComponent } from "./Import/component";
 
 export const sterioSlice = createSlice()
   .withData<{
-    youtubeMusicAlbumId?: string;
-    youtubePlaylistId?: string;
+    albumResources: Record<
+      "youtubeMusic" | "youtube" | "spotify",
+      Partial<SterioAlbumResource> | null
+    >;
     youtubePlaylistQueries: string[];
-    spotifyAlbumQuery?: string;
-    spotifyAlbumId?: string;
   }>({
+    albumResources: {
+      youtubeMusic: {
+        id: "MPREb_kGyzNTOQJLH",
+      },
+      youtube: {
+        id: "OLAK5uy_miuj7l2JKCuzKEoaT6eNeDQd6hvUxTrhI",
+      },
+      spotify: {
+        id: "6vPoK8jIddDv4a6ksinsGr",
+        iteratee: "${name/(.*) - (2023 Abbey Road Remaster)$/$1 ($2)/}",
+      },
+    },
     youtubePlaylistQueries: [],
   })
   .withStore(({ StoreProvider }) =>
     new StoreProvider()
       .provideSignals(({ signal }) => ({
-        youtubeMusicAlbumId: signal(({ data }) =>
-          data.property("youtubeMusicAlbumId"),
-        ),
-        youtubePlaylistId: signal(({ data }) =>
-          data.property("youtubePlaylistId"),
+        youtubeMusicAlbumResource: signal(({ data }) =>
+          data.property("albumResources").property("youtubeMusic"),
         ),
         youtubePlaylistQueries: signal(({ data }) =>
           data.property("youtubePlaylistQueries"),
         ),
-        spotifyAlbumQuery: signal(({ data }) =>
-          data.property("spotifyAlbumQuery"),
+        youtubeAlbumResource: signal(({ data }) =>
+          data.property("albumResources").property("youtube"),
         ),
-        spotifyAlbumId: signal(({ data }) => data.property("spotifyAlbumId")),
+        spotifyAlbumResource: signal(({ data }) =>
+          data.property("albumResources").property("spotify"),
+        ),
       }))
       .provideActions(({ action }) => ({
-        updateYoutubeMusicAlbumId: action<string>(({ youtubeMusicAlbumId }) =>
-          youtubeMusicAlbumId.update(constant),
-        ),
-        updateYoutubePlaylistId: action<string>(({ youtubePlaylistId }) =>
-          youtubePlaylistId.update(constant),
+        updateYoutubeMusicAlbumResource: action<Partial<SterioAlbumResource>>(
+          ({ youtubeMusicAlbumResource }) =>
+            youtubeMusicAlbumResource.update(
+              (resource) => (currentResource) => ({
+                ...(currentResource ?? {}),
+                ...resource,
+              }),
+            ),
         ),
         addYoutubePlaylistQuery: action<string>(({ youtubePlaylistQueries }) =>
           youtubePlaylistQueries.update(
             (query) => (queries) => uniq(queries.concat(query)),
           ),
         ),
-        updateSpotifyAlbumQuery: action<string>(({ spotifyAlbumQuery }) =>
-          spotifyAlbumQuery.update(constant),
+        updateYoutubeAlbumResource: action<Partial<SterioAlbumResource>>(
+          ({ youtubeAlbumResource }) =>
+            youtubeAlbumResource.update((resource) => (currentResource) => ({
+              ...(currentResource ?? {}),
+              ...resource,
+            })),
         ),
-        updateSpotifyAlbumId: action<string>(({ spotifyAlbumId }) =>
-          spotifyAlbumId.update(constant),
+        updateSpotifyAlbumResource: action<Partial<SterioAlbumResource>>(
+          ({ spotifyAlbumResource }) =>
+            spotifyAlbumResource.update((resource) => (currentResource) => ({
+              ...(currentResource ?? {}),
+              ...resource,
+            })),
         ),
       }))
       .complete(),
@@ -62,21 +87,27 @@ export const sterioSlice = createSlice()
       .provideEffects(({ effect }) => ({
         youtubeMusicAlbums: effect<
           string,
-          YoutubeMusicAlbums200ResponseInner[]
+          GetYoutubeMusicAlbums200ResponseInner[]
         >((api) => ({
-          predicate: (q) => api.youtubeMusicAlbums({ q }),
+          predicate: (q) => api.getYoutubeMusicAlbums({ q }),
         })),
         youtubePlaylists: effect<string[], YoutubePlaylist[]>((api) => ({
           predicate: (ids) =>
             ids.length > 0
-              ? api.youtubePlaylists({ ids: `${sortedUniq(sortBy(ids))}` })
+              ? api.getYoutubePlaylists({ ids: `${sortedUniq(sortBy(ids))}` })
               : [],
         })),
         spotifyAlbums: effect<string, SpotifyApiAlbumObjectSimplified[]>(
           (api) => ({
-            predicate: (q) => api.spotifyAlbums({ q }),
+            predicate: (q) => api.getSpotifyAlbums({ q }),
           }),
         ),
+        albumResourcesMatchColumns: effect<
+          GetAlbumResourcesMatchColumnsRequest,
+          SterioAlbumResourcesMatchColumns
+        >((api) => ({
+          predicate: (body) => api.getAlbumResourcesMatchColumns(body),
+        })),
       }))
       .complete(),
   )
@@ -117,6 +148,47 @@ export const sterioSlice = createSlice()
                 .youtubePlaylistIds()
                 .pipe(switchMap(api.effects.youtubePlaylists)),
         ),
+        albumResourcesMatchColumns: effect<
+          void,
+          SterioAlbumResourcesMatchColumns
+        >(
+          ({ store, api }) =>
+            () =>
+              combineLatest([
+                store.effects.youtubeMusicAlbumResource(),
+                store.effects.youtubeAlbumResource(),
+                store.effects.spotifyAlbumResource(),
+              ]).pipe(
+                flatMap(
+                  ([
+                    youtubeMusicAlbumResource,
+                    youtubeAlbumResource,
+                    spotifyAlbumResource,
+                  ]) =>
+                    youtubeMusicAlbumResource?.id != null &&
+                    youtubeAlbumResource?.id != null &&
+                    spotifyAlbumResource?.id != null
+                      ? api.effects.albumResourcesMatchColumns({
+                          sterioAlbumResourcesFull: {
+                            youtubeMusic: {
+                              id: youtubeMusicAlbumResource.id,
+                              iteratee: youtubeMusicAlbumResource.iteratee,
+                            },
+                            youtube: {
+                              id: youtubeAlbumResource.id,
+                              iteratee: youtubeAlbumResource.iteratee,
+                            },
+                            spotify: {
+                              id: spotifyAlbumResource.id,
+                              iteratee: spotifyAlbumResource.iteratee,
+                            },
+                          },
+                        })
+                      : [],
+                ),
+                mergeAll(),
+              ),
+        ),
       }))
       .complete(),
   )
@@ -126,20 +198,23 @@ export const sterioSlice = createSlice()
         Import: component(
           ({ store, api, terminal }) =>
             new ImportComponent({
-              youtubeMusicAlbumId: store.effects.youtubeMusicAlbumId,
-              updateYoutubeMusicAlbumId:
-                store.actions.updateYoutubeMusicAlbumId,
+              youtubeMusicAlbumResource:
+                store.effects.youtubeMusicAlbumResource,
+              updateYoutubeMusicAlbumResource:
+                store.actions.updateYoutubeMusicAlbumResource,
               youtubeMusicAlbums: api.effects.youtubeMusicAlbums,
-              youtubePlaylistId: store.effects.youtubePlaylistId,
-              updateYoutubePlaylistId: store.actions.updateYoutubePlaylistId,
               youtubePlaylistQueries: store.effects.youtubePlaylistQueries,
               addYoutubePlaylistQuery: store.actions.addYoutubePlaylistQuery,
+              youtubeAlbumResource: store.effects.youtubeAlbumResource,
+              updateYoutubeAlbumResource:
+                store.actions.updateYoutubeAlbumResource,
               youtubePlaylists: terminal.effects.youtubePlaylists,
-              spotifyAlbumQuery: store.effects.spotifyAlbumQuery,
-              updateSpotifyAlbumQuery: store.actions.updateSpotifyAlbumQuery,
-              spotifyAlbumId: store.effects.spotifyAlbumId,
-              updateSpotifyAlbumId: store.actions.updateSpotifyAlbumId,
+              spotifyAlbumResource: store.effects.spotifyAlbumResource,
+              updateSpotifyAlbumResource:
+                store.actions.updateSpotifyAlbumResource,
               spotifyAlbums: api.effects.spotifyAlbums,
+              albumResourcesMatchColumns:
+                terminal.effects.albumResourcesMatchColumns,
             }),
         ),
       }))

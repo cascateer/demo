@@ -15,12 +15,13 @@ export function Input(props: InputProps) {
           const input = createElement("input", {
             className: cn(globalClassNames.input),
             name: props.name,
+            placeholder: props.placeholder,
             type: "text",
           });
 
           merge(
             eventListener(input, "change"),
-            eventListener(input, "input").pipe(debounceTime(500)),
+            eventListener(input, "input").pipe(debounceTime(1e3)),
           )
             .pipe(withLatestFrom(value))
             .subscribe({

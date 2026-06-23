@@ -2,6 +2,7 @@
 
 body {
     background: radial-gradient(circle, #1e2a56 0%, black 100%);
+    color: white;
     font-family: "Roboto", sans-serif;
     font-weight: 300;
     height: 100vh;

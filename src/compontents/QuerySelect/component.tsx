@@ -23,6 +23,7 @@ export function QuerySelect<T>(props: QuerySelectProps<T>) {
             <div className={classNames.querySelect}>
               <Input
                 name={props.name}
+                placeholder={props.placeholder}
                 value={query}
                 onChange={over(props.onQueryChange ?? noop, updateQuery)}
                 onInput={over(props.onQueryInput ?? noop, updateQuery)}
