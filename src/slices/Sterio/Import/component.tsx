@@ -8,9 +8,10 @@ import {
 import { property } from "@cascateer/lib";
 import {
   GetYoutubeMusicAlbums200ResponseInner,
+  PartialSterioAlbumResourcesFull,
   SpotifyApiAlbumObjectSimplified,
   SterioAlbumResource,
-  SterioAlbumResourcesMatchColumns,
+  SterioAlbumResourcesTable,
   YoutubePlaylist,
 } from "@sterio/models";
 import { map } from "rxjs";
@@ -21,9 +22,20 @@ export const ImportComponent = createComponent("import")
   .withStyles(import("./styles.module.scss"), import("./styles.scss?inline"))
   .withTemplate<
     {
-      youtubeMusicAlbumResource: StoreEffect<Partial<SterioAlbumResource> | null>;
-      updateYoutubeMusicAlbumResource: Action<
-        Partial<SterioAlbumResource>,
+      spotifyAlbums: ApiEffect<string, SpotifyApiAlbumObjectSimplified[]>;
+      sterioAlbumResource: TerminalEffect<
+        keyof PartialSterioAlbumResourcesFull,
+        SterioAlbumResource | undefined
+      >;
+      sterioAlbumResourcesTable: TerminalEffect<
+        void,
+        SterioAlbumResourcesTable
+      >;
+      updateSterioAlbumResource: Action<
+        {
+          key: keyof PartialSterioAlbumResourcesFull;
+          data: Partial<SterioAlbumResource>;
+        },
         void
       >;
       youtubeMusicAlbums: ApiEffect<
@@ -32,121 +44,128 @@ export const ImportComponent = createComponent("import")
       >;
       youtubePlaylistQueries: StoreEffect<string[]>;
       addYoutubePlaylistQuery: Action<string, void>;
-      youtubeAlbumResource: StoreEffect<Partial<SterioAlbumResource> | null>;
-      updateYoutubeAlbumResource: Action<Partial<SterioAlbumResource>, void>;
       youtubePlaylists: TerminalEffect<void, YoutubePlaylist[]>;
-      spotifyAlbumResource: StoreEffect<Partial<SterioAlbumResource> | null>;
-      updateSpotifyAlbumResource: Action<Partial<SterioAlbumResource>, void>;
-      spotifyAlbums: ApiEffect<string, SpotifyApiAlbumObjectSimplified[]>;
-      albumResourcesMatchColumns: ApiEffect<
-        void,
-        SterioAlbumResourcesMatchColumns
-      >;
     },
     {}
-  >((ctx, classNames) => () => {
-    return (
-      <div className={classNames.importMatchColumns}>
-        <div className={classNames.importMatchColumn}>
-          <h4>YoutubeMusic*</h4>
-          <QuerySelect
-            placeholder="Search albums..."
-            options={ctx.youtubeMusicAlbums}
-            selectedValue={ctx
-              .youtubeMusicAlbumResource()
-              .pipe(map((resource) => resource?.id))}
-            name="youtube-music-album-resource-id"
-            enumerate={property("albumId")}
-            text={property("text")}
-            onChange={({ albumId }) =>
-              ctx.updateYoutubeMusicAlbumResource({ id: albumId })
-            }
-          />
-          <Input
-            name="youtube-music-album-resource-iteratee"
-            placeholder="iteratee"
-            value={ctx
-              .youtubeMusicAlbumResource()
-              .pipe(map((resource) => resource?.iteratee))}
-            onChange={(iteratee) =>
-              ctx.updateYoutubeMusicAlbumResource({ iteratee })
-            }
-          />
-          <>
-            {ctx
-              .albumResourcesMatchColumns()
-              .pipe(
-                map(({ youtubeMusic }) =>
-                  youtubeMusic.map((row) => <div>{row}</div>),
-                ),
-              )}
-          </>
-        </div>
-        <div className={classNames.importMatchColumn}>
-          <h4>Youtube</h4>
-          <QuerySelect
-            placeholder="Enter playlist ID or URL..."
-            onQueryChange={ctx.addYoutubePlaylistQuery}
-            options={() => ctx.youtubePlaylists()}
-            selectedValue={ctx
-              .youtubeAlbumResource()
-              .pipe(map((resource) => resource?.id))}
-            name="youtube-album-resource-id"
-            enumerate={property("id")}
-            text={(playlist) => playlist.title ?? playlist.id}
-            onChange={ctx.updateYoutubeAlbumResource}
-          />
-          <Input
-            name="youtube-album-resource-iteratee"
-            placeholder="iteratee"
-            value={ctx
-              .youtubeAlbumResource()
-              .pipe(map((resource) => resource?.iteratee))}
-            onChange={(iteratee) =>
-              ctx.updateYoutubeAlbumResource({ iteratee })
-            }
-          />
-          <>
-            {ctx
-              .albumResourcesMatchColumns()
-              .pipe(
-                map(({ youtube }) => youtube.map((row) => <div>{row}</div>)),
-              )}
-          </>
-        </div>
-        <div className={classNames.importMatchColumn}>
-          <h4>Spotify</h4>
-          <QuerySelect
-            placeholder="Search albums..."
-            options={ctx.spotifyAlbums}
-            selectedValue={ctx
-              .spotifyAlbumResource()
-              .pipe(map((resource) => resource?.id))}
-            name="spotify-album-resource-id"
-            enumerate={property("id")}
-            text={(album) =>
-              `${album.name} - ${album.artists.map(property("name")).join(", ")} (${album.release_date.slice(0, 4)})`
-            }
-            onChange={ctx.updateSpotifyAlbumResource}
-          />
-          <Input
-            name="spotify-album-resource-iteratee"
-            placeholder="iteratee"
-            value={ctx
-              .spotifyAlbumResource()
-              .pipe(map((resource) => resource?.iteratee))}
-            onChange={(iteratee) =>
-              ctx.updateSpotifyAlbumResource({ iteratee })
-            }
-          />
-          <>
-            {ctx
-              .albumResourcesMatchColumns()
-              .pipe(
-                map(({ spotify }) => spotify.map((row) => <div>{row}</div>)),
-              )}
-          </>
-        </div>
+  >((ctx, classNames) => () => (
+    <div className={classNames.importMatchColumns}>
+      <div className={classNames.importMatchColumn}>
+        <h4>YoutubeMusic*</h4>
+        <QuerySelect
+          placeholder="Search albums..."
+          options={ctx.youtubeMusicAlbums}
+          selectedValue={ctx
+            .sterioAlbumResource("youtubeMusic")
+            .pipe(map((resource) => resource?.id))}
+          name="youtube-music-album-resource-id"
+          enumerate={property("albumId")}
+          text={property("text")}
+          onChange={({ albumId }) =>
+            ctx.updateSterioAlbumResource({
+              key: "youtubeMusic",
+              data: { id: albumId },
+            })
+          }
+        />
+        <Input
+          name="youtube-music-album-resource-iteratee"
+          placeholder="iteratee"
+          value={ctx
+            .sterioAlbumResource("youtubeMusic")
+            .pipe(map((resource) => resource?.iteratee))}
+          onChange={(iteratee) =>
+            ctx.updateSterioAlbumResource({
+              key: "youtubeMusic",
+              data: { iteratee },
+            })
+          }
+        />
+        <>
+          {ctx
+            .sterioAlbumResourcesTable()
+            .pipe(
+              map(({ youtubeMusic }) =>
+                youtubeMusic.map((row) => <div>{row}</div>),
+              ),
+            )}
+        </>
       </div>
-    );
-  });
+      <div className={classNames.importMatchColumn}>
+        <h4>Youtube</h4>
+        <QuerySelect
+          placeholder="Enter playlist ID or URL..."
+          onQueryChange={ctx.addYoutubePlaylistQuery}
+          options={() => ctx.youtubePlaylists()}
+          selectedValue={ctx
+            .sterioAlbumResource("youtube")
+            .pipe(map((resource) => resource?.id))}
+          name="youtube-album-resource-id"
+          enumerate={property("id")}
+          text={(playlist) => playlist.title ?? playlist.id}
+          onChange={({ id }) =>
+            ctx.updateSterioAlbumResource({
+              key: "youtube",
+              data: { id },
+            })
+          }
+        />
+        <Input
+          name="youtube-album-resource-iteratee"
+          placeholder="iteratee"
+          value={ctx
+            .sterioAlbumResource("youtube")
+            .pipe(map((resource) => resource?.iteratee))}
+          onChange={(iteratee) =>
+            ctx.updateSterioAlbumResource({
+              key: "youtube",
+              data: { iteratee },
+            })
+          }
+        />
+        <>
+          {ctx
+            .sterioAlbumResourcesTable()
+            .pipe(map(({ youtube }) => youtube.map((row) => <div>{row}</div>)))}
+        </>
+      </div>
+      <div className={classNames.importMatchColumn}>
+        <h4>Spotify</h4>
+        <QuerySelect
+          placeholder="Search albums..."
+          options={ctx.spotifyAlbums}
+          selectedValue={ctx
+            .sterioAlbumResource("spotify")
+            .pipe(map((resource) => resource?.id))}
+          name="spotify-album-resource-id"
+          enumerate={property("id")}
+          text={(album) =>
+            `${album.name} - ${album.artists.map(property("name")).join(", ")} (${album.release_date.slice(0, 4)})`
+          }
+          onChange={({ id }) =>
+            ctx.updateSterioAlbumResource({
+              key: "spotify",
+              data: { id },
+            })
+          }
+        />
+        <Input
+          name="spotify-album-resource-iteratee"
+          placeholder="iteratee"
+          value={ctx
+            .sterioAlbumResource("spotify")
+            .pipe(map((resource) => resource?.iteratee))}
+          onChange={(iteratee) =>
+            ctx.updateSterioAlbumResource({
+              key: "spotify",
+              data: { iteratee },
+            })
+          }
+        />
+        <>
+          {ctx
+            .sterioAlbumResourcesTable()
+            .pipe(map(({ spotify }) => spotify.map((row) => <div>{row}</div>)))}
+        </>
+      </div>
+    </div>
+  ));

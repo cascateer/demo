@@ -1,7 +1,7 @@
 import {
   ApiProvider,
   createSlice,
-  defineCustomProperties,
+  registerCustomProperties,
 } from "@cascateer/core";
 import { property } from "@cascateer/lib";
 import axios from "axios";
@@ -14,7 +14,7 @@ import { Cube } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-defineCustomProperties({
+registerCustomProperties({
   "--cubie-coord-0": {
     inherits: true,
     initialValue: "0",
