@@ -1,5 +1,4 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
-import { flatMap } from "@cascateer/lib/observables";
 import { DefaultApi, UpdateAlbumRequest } from "@sterio/apis";
 import {
   GetYoutubeMusicAlbums200ResponseInner,
@@ -53,13 +52,12 @@ export const sterioSlice = createSlice()
           predicate: (id) => api.getAlbum({ id }),
           tags: STERIO_ALBUM_TAG,
         })),
-        sterioAlbumResourcesTable: effect<
-          string,
-          SterioAlbumResourcesTable | undefined
-        >((api) => ({
-          predicate: (id) => api.getAlbumResourcesTable({ id }),
-          tags: STERIO_ALBUM_TAG,
-        })),
+        sterioAlbumResourcesTable: effect<string, SterioAlbumResourcesTable>(
+          (api) => ({
+            predicate: (id) => api.getAlbumResourcesTable({ id }),
+            tags: STERIO_ALBUM_TAG,
+          }),
+        ),
         youtubeMusicAlbums: effect<
           string,
           GetYoutubeMusicAlbums200ResponseInner[]
@@ -94,10 +92,11 @@ export const sterioSlice = createSlice()
         sterioAlbumResourcesTable: effect<void, SterioAlbumResourcesTable>(
           ({ store, api }) =>
             () =>
-              store.effects.sterioAlbumId().pipe(
-                switchMap((id) => api.effects.sterioAlbumResourcesTable(id)),
-                flatMap((table) => table ?? []),
-              ),
+              store.effects
+                .sterioAlbumId()
+                .pipe(
+                  switchMap((id) => api.effects.sterioAlbumResourcesTable(id)),
+                ),
         ),
         youtubePlaylistIds: effect<void, string[]>(
           ({ store }) =>

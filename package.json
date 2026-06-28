@@ -22,7 +22,7 @@
     "vite-plugin-sass-dts": "^1.3.37"
   },
   "dependencies": {
-    "@cascateer/core": "^2.4.36",
+    "@cascateer/core": "^2.4.40",
     "@cascateer/lib": "^1.0.51",
     "axios": "^1.18.1",
     "classnames": "^2.5.1",
