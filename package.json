@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@cascateer/core": "^2.4.40",
-    "@cascateer/lib": "^1.0.51",
+    "@cascateer/lib": "^1.0.53",
     "axios": "^1.18.1",
     "classnames": "^2.5.1",
     "lodash": "^4.18.1",
