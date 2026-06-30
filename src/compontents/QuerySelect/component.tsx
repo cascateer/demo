@@ -7,9 +7,9 @@ import { QuerySelectProps } from "./types";
 
 export function QuerySelect<T>(props: QuerySelectProps<T>) {
   return createStandaloneComponent("query-select")
-    .withStyles(import("../styles.module.scss"), import("./styles.module.scss"))
+    .withStyles(import("./styles.module.scss"), import("../styles.module.scss"))
     .withTemplate<QuerySelectProps<T>>(
-      (globalClassNames, classNames) =>
+      (classNames) =>
         ({ options, ...props }) => {
           const { query, updateQuery } = thru(
             new BehaviorSubject<string | undefined>(void 0),

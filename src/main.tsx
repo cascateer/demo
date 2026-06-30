@@ -10,7 +10,7 @@ new App(
         sterio: slice(() => sterioSlice),
       }))
       .complete(),
-  ({ rubiks: Rubiks, sterio: Sterio }) => (
+  ({ rubiks: _, sterio: Sterio }) => (
     <>
       {/* <Rubiks /> */}
       <Sterio />
