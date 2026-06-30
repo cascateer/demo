@@ -17,10 +17,7 @@
     "useDefineForClassFields": true,
 
     "jsx": "react-jsx",
-    "jsxImportSource": "@cascateer/core",
-    "paths": {
-      "@sterio/*": ["../sterio/api/*"]
-    }
+    "jsxImportSource": "@cascateer/core"
   },
   "include": ["src"]
 }

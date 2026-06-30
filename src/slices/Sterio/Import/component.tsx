@@ -13,7 +13,7 @@ import {
   SterioAlbumResource,
   SterioAlbumResourcesTable,
   YoutubePlaylist,
-} from "@sterio/models";
+} from "@cascateer/sterio/api/models";
 import { map } from "rxjs";
 import { Input } from "../../../compontents/Input/component";
 import { QuerySelect } from "../../../compontents/QuerySelect/component";
