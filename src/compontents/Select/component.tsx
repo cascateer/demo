@@ -6,7 +6,7 @@ import {
   nonNullable,
   nthArg,
 } from "@cascateer/lib";
-import { eventListener } from "@cascateer/lib/observables";
+import { eventListener } from "@cascateer/lib/observable";
 import cn from "classnames";
 import { noop } from "lodash";
 import { combineLatest, map, startWith, withLatestFrom } from "rxjs";
