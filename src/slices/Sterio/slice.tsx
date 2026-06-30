@@ -1,14 +1,15 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
-import { DefaultApi, UpdateAlbumRequest } from "@cascateer/sterio/api/apis";
 import {
+  DefaultApi,
   GetYoutubeMusicAlbums200ResponseInner,
   PartialSterioAlbumResourcesFull,
   SpotifyApiAlbumObjectSimplified,
   SterioAlbum,
   SterioAlbumResource,
   SterioAlbumResourcesTable,
+  UpdateAlbumRequest,
   YoutubePlaylist,
-} from "@cascateer/sterio/api/models";
+} from "@cascateer/sterio/api";
 import { sortBy, sortedUniq, uniq } from "lodash";
 import { firstValueFrom, map, switchMap } from "rxjs";
 import { ImportComponent } from "./Import/component";
