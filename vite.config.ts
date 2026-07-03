@@ -1,28 +1,39 @@
-import type { UserConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import sassDts from "vite-plugin-sass-dts";
 
-export default {
-  plugins: [
-    sassDts({
-      legacyFileFormat: true,
-    }),
-  ],
+export default defineConfig(({ mode }) => {
+  const { VITE_HOST, VITE_PORT } = loadEnv(mode, process.cwd());
 
-  oxc: {
-    jsx: {
-      runtime: "automatic",
-      importSource: "@cascateer/core",
+  return {
+    plugins: [
+      sassDts({
+        legacyFileFormat: true,
+      }),
+    ],
+
+    oxc: {
+      jsx: {
+        runtime: "automatic",
+        importSource: "@cascateer/core",
+      },
     },
-  },
 
-  css: {
-    modules: {
-      scopeBehaviour: "local",
-      localsConvention: "camelCaseOnly",
+    css: {
+      modules: {
+        scopeBehaviour: "local",
+        localsConvention: "camelCaseOnly",
+      },
     },
-  },
 
-  server: {
-    port: 4173,
-  },
-} satisfies UserConfig;
+    resolve: {
+      alias: {
+        "@cascateer/test": "/test",
+      },
+    },
+
+    server: {
+      host: VITE_HOST,
+      port: VITE_PORT != null ? +VITE_PORT : void 0,
+    },
+  };
+});

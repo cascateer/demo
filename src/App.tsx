@@ -10,10 +10,5 @@ new App(
         sterio: slice(() => sterioSlice),
       }))
       .complete(),
-  ({ rubiks: _, sterio: Sterio }) => (
-    <>
-      {/* <Rubiks /> */}
-      <Sterio />
-    </>
-  ),
-).appendTo(document.body);
+  ({ sterio: Sterio }) => <Sterio />,
+).renderTo(document.body);
