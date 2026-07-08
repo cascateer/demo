@@ -7,9 +7,9 @@ import {
 } from "@cascateer/core";
 import { EndoFunction, property } from "@cascateer/lib";
 import {
-  GetYoutubeMusicAlbums200ResponseInner,
-  SpotifyApiAlbumObjectSimplified,
+  SpotifyAlbumResponse,
   SterioAlbum,
+  YoutubeMusicAlbumResponse,
   YoutubePlaylist,
 } from "@cascateer/sterio/api";
 import { map } from "rxjs";
@@ -28,13 +28,13 @@ export const ImportComponent = createComponent("import")
       sterioAlbumResourceConflicts: TerminalEffect<void, string>;
 
       youtubeMusicAlbums: ApiEffect<
-        string,
-        GetYoutubeMusicAlbums200ResponseInner[]
+        string | undefined,
+        YoutubeMusicAlbumResponse[]
       >;
       youtubePlaylistQueries: StoreEffect<string[]>;
       addYoutubePlaylistQuery: Action<string, void>;
       youtubePlaylists: TerminalEffect<void, YoutubePlaylist[]>;
-      spotifyAlbums: ApiEffect<string, SpotifyApiAlbumObjectSimplified[]>;
+      spotifyAlbums: ApiEffect<string | undefined, SpotifyAlbumResponse[]>;
     },
     {}
   >((ctx, classNames) => () => (
@@ -62,7 +62,9 @@ export const ImportComponent = createComponent("import")
               .pipe(map(property("youtubeMusicId")))}
             name="youtube-music-album-resource-id"
             enumerate={property("albumId")}
-            text={property("text")}
+            text={(album) =>
+              `${album.isSaved ? "☑" : "☐"} ${album.name} / ${album.artist.name} (${album.year})`
+            }
             onChange={({ albumId }) => ctx.updateSterioAlbumId(albumId)}
           />
           <Input

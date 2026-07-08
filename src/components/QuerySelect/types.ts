@@ -6,5 +6,5 @@ export type QuerySelectProps<T> = {
   query?: Observable<string | undefined>;
   onQueryChange?: UnaryFunction<string, void>;
   onQueryInput?: UnaryFunction<string, void>;
-  options: (query: string) => Observable<T>;
+  options: (query?: string) => Observable<T>;
 } & Omit<SelectProps<T>, "options">;

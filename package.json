@@ -25,7 +25,7 @@
   "dependencies": {
     "@cascateer/core": "^2.4.54",
     "@cascateer/lib": "^1.0.66",
-    "@cascateer/sterio": "^1.0.11",
+    "@cascateer/sterio": "^1.0.18",
     "axios": "^1.18.1",
     "classnames": "^2.5.1",
     "globals": "^17.7.0",
