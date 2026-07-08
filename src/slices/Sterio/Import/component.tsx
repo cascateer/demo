@@ -13,8 +13,8 @@ import {
   YoutubePlaylist,
 } from "@cascateer/sterio/api";
 import { map } from "rxjs";
-import { Input } from "../../../compontents/Input/component";
-import { QuerySelect } from "../../../compontents/QuerySelect/component";
+import { Input } from "../../../components/Input/component";
+import { QuerySelect } from "../../../components/QuerySelect/component";
 
 export const ImportComponent = createComponent("import")
   .withStyles(import("./styles.module.scss"), import("./styles.scss?inline"))
