@@ -8,8 +8,8 @@ import {
   UpdateAlbumRequest,
   YoutubePlaylist,
 } from "@cascateer/sterio/api";
-import { constant, sortBy, sortedUniq, uniq } from "lodash";
-import { firstValueFrom, map, switchMap } from "rxjs";
+import { constant, sortBy, sortedUniq, thru, uniq } from "lodash";
+import { combineLatest, firstValueFrom, map, switchMap } from "rxjs";
 import { ImportComponent } from "./Import/component";
 
 const STERIO_ALBUM_TAG = (id: string) => `sterio/album/${id}`;
@@ -48,6 +48,9 @@ export const sterioSlice = createSlice()
         sterioAlbum: effect<string, SterioAlbum>((api) => ({
           predicate: (id) => api.getAlbum({ id }),
           tags: STERIO_ALBUM_TAG,
+        })),
+        sterioAlbumIds: effect<void, string[]>((api) => ({
+          predicate: () => api.getAlbumIds(),
         })),
         sterioAlbumResourceConflicts: effect<string, string>((api) => ({
           predicate: (id) => api.getAlbumResourceConflicts({ id }),
@@ -89,6 +92,27 @@ export const sterioSlice = createSlice()
               store.effects
                 .sterioAlbumId()
                 .pipe(switchMap((id) => api.effects.sterioAlbum(id))),
+        ),
+        sterioAlbumIds: effect<void, string[]>(
+          ({ api }) =>
+            () =>
+              api.effects.sterioAlbumIds(),
+        ),
+      }))
+      .provideEffects(({ effect }) => ({
+        sterioAlbumIndex: effect<void, number>(
+          ({ terminal }) =>
+            () =>
+              combineLatest([
+                terminal.effects.sterioAlbumIds(),
+                terminal.effects.sterioAlbum(),
+              ]).pipe(
+                map(([albumIds, album]) =>
+                  albumIds.findIndex(
+                    (albumId) => albumId === album.youtubeMusicId,
+                  ),
+                ),
+              ),
         ),
         sterioAlbumResourceConflicts: effect<void, string>(
           ({ store, api }) =>
@@ -137,6 +161,25 @@ export const sterioSlice = createSlice()
         ),
       }))
       .provideActions(({ action }) => ({
+        stepSterioAlbum: action<number, void>(
+          ({ store, terminal }) =>
+            (step) =>
+              firstValueFrom(
+                combineLatest([
+                  terminal.effects.sterioAlbum(),
+                  terminal.effects.sterioAlbumIds(),
+                ]),
+              ).then(([album, albumIds]) =>
+                thru(
+                  albumIds[albumIds.indexOf(album.youtubeMusicId) + step],
+                  async (albumId) => {
+                    if (albumId != null) {
+                      return store.actions.updateSterioAlbumId(albumId);
+                    }
+                  },
+                ),
+              ),
+        ),
         updateSterioAlbum: action<EndoFunction<SterioAlbum>, void>(
           ({ api, terminal }) =>
             (patch) =>
@@ -157,6 +200,8 @@ export const sterioSlice = createSlice()
             new ImportComponent({
               updateSterioAlbumId: store.actions.updateSterioAlbumId,
               sterioAlbum: terminal.effects.sterioAlbum,
+              sterioAlbumIndex: terminal.effects.sterioAlbumIndex,
+              stepSterioAlbum: terminal.actions.stepSterioAlbum,
               updateSterioAlbum: terminal.actions.updateSterioAlbum,
               sterioAlbumResourceConflicts:
                 terminal.effects.sterioAlbumResourceConflicts,
