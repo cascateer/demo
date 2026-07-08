@@ -1,16 +1,14 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
+import { EndoFunction } from "@cascateer/lib";
 import {
   DefaultApi,
   GetYoutubeMusicAlbums200ResponseInner,
-  PartialSterioAlbumResourcesFull,
   SpotifyApiAlbumObjectSimplified,
   SterioAlbum,
-  SterioAlbumResource,
-  SterioAlbumResourcesTable,
   UpdateAlbumRequest,
   YoutubePlaylist,
 } from "@cascateer/sterio/api";
-import { sortBy, sortedUniq, uniq } from "lodash";
+import { constant, sortBy, sortedUniq, uniq } from "lodash";
 import { firstValueFrom, map, switchMap } from "rxjs";
 import { ImportComponent } from "./Import/component";
 
@@ -21,7 +19,7 @@ export const sterioSlice = createSlice()
     sterioAlbumId: string;
     youtubePlaylistQueries: string[];
   }>({
-    sterioAlbumId: "d155219c-89ca-47c1-8f12-80c9d85a9fec",
+    sterioAlbumId: "MPREb_bt4NaNkx0W4",
     youtubePlaylistQueries: [],
   })
   .withStore(({ StoreProvider }) =>
@@ -38,27 +36,23 @@ export const sterioSlice = createSlice()
             (query) => (queries) => uniq(queries.concat(query)),
           ),
         ),
+        updateSterioAlbumId: action<string>(({ sterioAlbumId }) =>
+          sterioAlbumId.update(constant),
+        ),
       }))
       .complete(),
   )
   .withApi(
     new ApiProvider(new DefaultApi())
       .provideEffects(({ effect }) => ({
-        spotifyAlbums: effect<string, SpotifyApiAlbumObjectSimplified[]>(
-          (api) => ({
-            predicate: (q) => api.getSpotifyAlbums({ q }),
-          }),
-        ),
         sterioAlbum: effect<string, SterioAlbum>((api) => ({
           predicate: (id) => api.getAlbum({ id }),
           tags: STERIO_ALBUM_TAG,
         })),
-        sterioAlbumResourcesTable: effect<string, SterioAlbumResourcesTable>(
-          (api) => ({
-            predicate: (id) => api.getAlbumResourcesTable({ id }),
-            tags: STERIO_ALBUM_TAG,
-          }),
-        ),
+        sterioAlbumResourceConflicts: effect<string, string>((api) => ({
+          predicate: (id) => api.getAlbumResourceConflicts({ id }),
+          tags: STERIO_ALBUM_TAG,
+        })),
         youtubeMusicAlbums: effect<
           string,
           GetYoutubeMusicAlbums200ResponseInner[]
@@ -71,11 +65,17 @@ export const sterioSlice = createSlice()
               ? api.getYoutubePlaylists({ ids: `${sortedUniq(sortBy(ids))}` })
               : [],
         })),
+        spotifyAlbums: effect<string, SpotifyApiAlbumObjectSimplified[]>(
+          (api) => ({
+            predicate: (q) => api.getSpotifyAlbums({ q }),
+          }),
+        ),
       }))
       .provideActions(({ action }) => ({
         updateSterioAlbum: action<UpdateAlbumRequest, void>((api) => ({
           predicate: (request) => api.updateAlbum(request),
-          tags: ({ sterioAlbum }) => STERIO_ALBUM_TAG(sterioAlbum.id),
+          tags: ({ sterioAlbum }) =>
+            STERIO_ALBUM_TAG(sterioAlbum.youtubeMusicId),
         })),
       }))
       .complete(),
@@ -90,13 +90,15 @@ export const sterioSlice = createSlice()
                 .sterioAlbumId()
                 .pipe(switchMap((id) => api.effects.sterioAlbum(id))),
         ),
-        sterioAlbumResourcesTable: effect<void, SterioAlbumResourcesTable>(
+        sterioAlbumResourceConflicts: effect<void, string>(
           ({ store, api }) =>
             () =>
               store.effects
                 .sterioAlbumId()
                 .pipe(
-                  switchMap((id) => api.effects.sterioAlbumResourcesTable(id)),
+                  switchMap((id) =>
+                    api.effects.sterioAlbumResourceConflicts(id),
+                  ),
                 ),
         ),
         youtubePlaylistIds: effect<void, string[]>(
@@ -133,39 +135,14 @@ export const sterioSlice = createSlice()
                 .youtubePlaylistIds()
                 .pipe(switchMap(api.effects.youtubePlaylists)),
         ),
-        sterioAlbumResource: effect<
-          keyof PartialSterioAlbumResourcesFull,
-          SterioAlbumResource | undefined
-        >(
-          ({ terminal }) =>
-            (key) =>
-              terminal.effects
-                .sterioAlbum()
-                .pipe(map(({ resources }) => resources?.[key])),
-        ),
       }))
       .provideActions(({ action }) => ({
-        updateSterioAlbumResource: action<
-          {
-            key: keyof PartialSterioAlbumResourcesFull;
-            data: Partial<SterioAlbumResource>;
-          },
-          void
-        >(
+        updateSterioAlbum: action<EndoFunction<SterioAlbum>, void>(
           ({ api, terminal }) =>
-            ({ key, data }) =>
+            (patch) =>
               firstValueFrom(terminal.effects.sterioAlbum()).then((album) =>
                 api.actions.updateSterioAlbum({
-                  sterioAlbum: {
-                    ...album,
-                    resources: {
-                      ...album.resources,
-                      [key]: {
-                        ...album.resources?.[key],
-                        ...data,
-                      },
-                    },
-                  },
+                  sterioAlbum: patch(album),
                 }),
               ),
         ),
@@ -178,16 +155,16 @@ export const sterioSlice = createSlice()
         Import: component(
           ({ store, api, terminal }) =>
             new ImportComponent({
-              spotifyAlbums: api.effects.spotifyAlbums,
-              sterioAlbumResource: terminal.effects.sterioAlbumResource,
-              sterioAlbumResourcesTable:
-                terminal.effects.sterioAlbumResourcesTable,
-              updateSterioAlbumResource:
-                terminal.actions.updateSterioAlbumResource,
+              updateSterioAlbumId: store.actions.updateSterioAlbumId,
+              sterioAlbum: terminal.effects.sterioAlbum,
+              updateSterioAlbum: terminal.actions.updateSterioAlbum,
+              sterioAlbumResourceConflicts:
+                terminal.effects.sterioAlbumResourceConflicts,
               youtubeMusicAlbums: api.effects.youtubeMusicAlbums,
               youtubePlaylistQueries: store.effects.youtubePlaylistQueries,
               addYoutubePlaylistQuery: store.actions.addYoutubePlaylistQuery,
               youtubePlaylists: terminal.effects.youtubePlaylists,
+              spotifyAlbums: api.effects.spotifyAlbums,
             }),
         ),
       }))

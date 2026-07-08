@@ -1,5 +1,5 @@
 declare const classNames: {
-  readonly importMatchColumns: "importMatchColumns";
-  readonly importMatchColumn: "importMatchColumn";
+  readonly importColumns: "importColumns";
+  readonly importColumn: "importColumn";
 };
 export = classNames;
