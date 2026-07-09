@@ -1,8 +1,9 @@
 import { createStandaloneComponent } from "@cascateer/core";
-import { createElement } from "@cascateer/lib";
+import { createElement, property } from "@cascateer/lib";
 import { eventListener } from "@cascateer/lib/observable";
 import cn from "classnames";
-import { debounceTime, merge, withLatestFrom } from "rxjs";
+import { compact } from "lodash";
+import { BehaviorSubject, map, merge, tap } from "rxjs";
 import { InputProps } from "./types";
 
 export function Input(props: InputProps) {
@@ -10,6 +11,8 @@ export function Input(props: InputProps) {
   return createStandaloneComponent("input")
     .withStyles(import("../styles.module.scss"), import("./styles.module.scss"))
     .withTemplate<InputProps>((globalClassNames) => ({ value, ...props }) => {
+      const valueSubject = new BehaviorSubject<string | undefined>(void 0);
+
       const input = createElement("input", {
         className: cn(globalClassNames.input),
         name: props.name,
@@ -17,33 +20,23 @@ export function Input(props: InputProps) {
         type: "text",
       });
 
-      merge(
-        eventListener(input, "change"),
-        eventListener(input, "input").pipe(debounceTime(1e3)),
-      )
-        .pipe(withLatestFrom(value))
-        .subscribe({
-          next: ([{ type, target }, sourceValue]) => {
-            const targetValue = target.value;
+      eventListener(input, "input")
+        .pipe(
+          map(property("target")),
+          map(property("value")),
+          tap(props.onInput),
+        )
+        .subscribe(valueSubject);
 
-            if (targetValue !== sourceValue) {
-              target.value = sourceValue ?? "";
-            }
+      eventListener(input, "change")
+        .pipe(
+          map(property("target")),
+          map(property("value")),
+          tap(props.onChange),
+        )
+        .subscribe();
 
-            switch (type) {
-              case "change":
-                props.onChange?.call(null, targetValue);
-
-                break;
-              case "input":
-                props.onInput?.call(null, targetValue);
-
-                break;
-            }
-          },
-        });
-
-      value.subscribe({
+      merge(...compact([valueSubject, value])).subscribe({
         next: (value) => (input.value = value ?? ""),
       });
 
