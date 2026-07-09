@@ -1,11 +1,12 @@
 import { ApiProvider, createSlice } from "@cascateer/core";
 import { EndoFunction } from "@cascateer/lib";
+import { modulo } from "@cascateer/lib/math";
 import {
   DefaultApi,
   SpotifyAlbumResponse,
   SterioAlbum,
   SterioAlbumFull,
-  UpdateAlbumRequest,
+  SterioCompilerConfig,
   YoutubeMusicAlbumResponse,
   YoutubePlaylist,
 } from "@cascateer/sterio/api";
@@ -20,7 +21,7 @@ export const sterioSlice = createSlice()
     sterioAlbumId: string;
     youtubePlaylistQueries: string[];
   }>({
-    sterioAlbumId: "MPREb_bt4NaNkx0W4",
+    sterioAlbumId: "MPREb_kGyzNTOQJLH",
     youtubePlaylistQueries: [],
   })
   .withStore(({ StoreProvider }) =>
@@ -83,10 +84,13 @@ export const sterioSlice = createSlice()
         })),
       }))
       .provideActions(({ action }) => ({
-        updateSterioAlbum: action<UpdateAlbumRequest, void>((api) => ({
-          predicate: (request) => api.updateAlbum(request),
-          tags: ({ sterioAlbum }) =>
-            STERIO_ALBUM_TAG(sterioAlbum.youtubeMusicId),
+        updateSterioAlbum: action<SterioAlbum, void>((api) => ({
+          predicate: (sterioAlbum) => api.updateAlbum({ sterioAlbum }),
+          tags: ({ youtubeMusicId }) => STERIO_ALBUM_TAG(youtubeMusicId),
+        })),
+        compileSterioAlbums: action<SterioCompilerConfig, string>((api) => ({
+          predicate: (sterioCompilerConfig) =>
+            api.compileAlbums({ sterioCompilerConfig }),
         })),
       }))
       .complete(),
@@ -208,7 +212,12 @@ export const sterioSlice = createSlice()
                 ]),
               ).then(([album, albumIds]) =>
                 thru(
-                  albumIds[albumIds.indexOf(album.youtubeMusicId) + step],
+                  albumIds[
+                    modulo(
+                      albumIds.indexOf(album.youtubeMusicId) + step,
+                      albumIds.length,
+                    )
+                  ],
                   async (albumId) => {
                     if (albumId != null) {
                       return store.actions.updateSterioAlbumId(albumId);
@@ -221,9 +230,18 @@ export const sterioSlice = createSlice()
           ({ api, terminal }) =>
             (patch) =>
               firstValueFrom(terminal.effects.sterioAlbum()).then((album) =>
-                api.actions.updateSterioAlbum({
-                  sterioAlbum: patch(album),
-                }),
+                api.actions.updateSterioAlbum(patch(album)),
+              ),
+        ),
+        compileSterioAlbums: action<boolean, string>(
+          ({ api, terminal }) =>
+            (out) =>
+              firstValueFrom(terminal.effects.sterioAlbumIndex()).then(
+                (index) =>
+                  api.actions.compileSterioAlbums({
+                    limit: index + 1,
+                    out,
+                  }),
               ),
         ),
       }))
@@ -233,13 +251,14 @@ export const sterioSlice = createSlice()
     new ComponentsProvider()
       .provideComponents(({ component }) => ({
         Import: component(
-          ({ store, api, terminal }) =>
+          ({ store, terminal }) =>
             new ImportComponent({
               updateSterioAlbumId: store.actions.updateSterioAlbumId,
               sterioAlbum: terminal.effects.sterioAlbum,
               sterioAlbumIndex: terminal.effects.sterioAlbumIndex,
               stepSterioAlbum: terminal.actions.stepSterioAlbum,
               updateSterioAlbum: terminal.actions.updateSterioAlbum,
+              compileSterioAlbums: terminal.actions.compileSterioAlbums,
               sterioAlbumResourceConflicts:
                 terminal.effects.sterioAlbumResourceConflicts,
               youtubeMusicAlbums: terminal.effects.youtubeMusicAlbums,

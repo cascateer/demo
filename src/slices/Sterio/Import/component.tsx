@@ -25,6 +25,7 @@ export const ImportComponent = createComponent("import")
       sterioAlbumIndex: TerminalEffect<void, number>;
       stepSterioAlbum: Action<number, void>;
       updateSterioAlbum: Action<EndoFunction<SterioAlbum>, void>;
+      compileSterioAlbums: Action<boolean, string>;
       sterioAlbumResourceConflicts: TerminalEffect<void, string>;
 
       youtubeMusicAlbums: ApiEffect<
@@ -42,14 +43,15 @@ export const ImportComponent = createComponent("import")
       <div
         style={{
           display: "flex",
-          width: "100px",
+          width: "200px",
           justifyContent: "space-around",
           fontSize: "xx-large",
         }}
       >
         <button onClick={() => ctx.stepSterioAlbum(-1)}>&lt;</button>
-        <div>{ctx.sterioAlbumIndex()}</div>
+        <div>{ctx.sterioAlbumIndex().pipe(map((index) => index + 1))}</div>
         <button onClick={() => ctx.stepSterioAlbum(+1)}>&gt;</button>
+        <button onClick={() => ctx.compileSterioAlbums(true)}>COMPILE</button>
       </div>
       <div className={classNames.importColumns}>
         <div className={classNames.importColumn}>
@@ -146,7 +148,9 @@ export const ImportComponent = createComponent("import")
           .sterioAlbumResourceConflicts()
           .pipe(
             map(
-              (html) => new DOMParser().parseFromString(html, "text/html").body,
+              (html) =>
+                new DOMParser().parseFromString(html, "text/html").body
+                  .firstChild,
             ),
           )}
       </p>
